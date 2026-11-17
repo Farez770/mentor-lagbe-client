@@ -45,19 +45,19 @@ export default function HowItWorks() {
           {steps.map((step, index) => (
             <FadeIn key={step.title} delay={index * 0.12} className="h-full">
               <div className="relative bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg transition-shadow h-full">
-              {/* Step number in the corner */}
-              <span className="absolute top-4 right-4 text-5xl font-extrabold text-slate-100">
-                {index + 1}
-              </span>
-              <span className="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center mb-5">
-                <step.icon className="w-6 h-6 text-white" />
-              </span>
-              <h3 className="font-bold text-lg text-slate-900">
-                {step.title}
-              </h3>
-              <p className="mt-2 text-sm md:text-base text-slate-600 leading-7">
-                {step.description}
-              </p>
+                {/* Step number in the corner */}
+                <span className="absolute top-4 right-4 text-5xl font-extrabold text-slate-200">
+                  {index + 1}
+                </span>
+                <span className="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center mb-5">
+                  <step.icon className="w-6 h-6 text-white" />
+                </span>
+                <h3 className="font-bold text-lg text-slate-900">
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-sm md:text-base text-slate-600 leading-7">
+                  {step.description}
+                </p>
               </div>
             </FadeIn>
           ))}

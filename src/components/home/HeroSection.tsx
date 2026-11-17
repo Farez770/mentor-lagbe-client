@@ -55,21 +55,30 @@ export default function HeroSection() {
             <div className="mt-10 flex flex-wrap justify-center lg:justify-start gap-6 sm:gap-10 lg:gap-12">
               <div>
                 <p className="flex items-center gap-2 text-xl sm:text-2xl font-extrabold text-slate-900">
-                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" /> 2,500+
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />{" "}
+                  2,500+
                 </p>
-                <p className="text-xs sm:text-sm text-slate-600 mt-1">Active Students</p>
+                <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                  Active Students
+                </p>
               </div>
               <div>
                 <p className="flex items-center gap-2 text-xl sm:text-2xl font-extrabold text-slate-900">
-                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" /> 800+
+                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />{" "}
+                  800+
                 </p>
-                <p className="text-xs sm:text-sm text-slate-600 mt-1">Tuition Batches</p>
+                <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                  Tuition Batches
+                </p>
               </div>
               <div>
                 <p className="flex items-center gap-2 text-xl sm:text-2xl font-extrabold text-slate-900">
-                  <Award className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" /> 350+
+                  <Award className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />{" "}
+                  350+
                 </p>
-                <p className="text-xs sm:text-sm text-slate-600 mt-1">Verified Tutors</p>
+                <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                  Verified Tutors
+                </p>
               </div>
             </div>
           </FadeIn>
@@ -80,13 +89,16 @@ export default function HeroSection() {
           <img
             src="https://images.unsplash.com/photo-1522202176988-66273c81fd05?w=800&q=80"
             alt="Students learning together"
-            className="w-full h-72 sm:h-96 lg:h-[480px] object-cover rounded-3xl shadow-xl"
+            className="w-full h-72 sm:h-96 lg:h-[480px] object-cover rounded-3xl shadow-xl text-black"
           />
 
           {/* Floating mini cards on top of the image (they gently bob).
               They use smaller text/padding on mobile so they never
               stick out past the screen edge. */}
-          <Float delay={0.5} className="absolute -bottom-4 sm:-bottom-5 left-3 sm:left-8">
+          <Float
+            delay={0.5}
+            className="absolute -bottom-4 sm:-bottom-5 left-3 sm:left-8"
+          >
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg px-3 py-2.5 sm:px-5 sm:py-4 flex items-center gap-2 sm:gap-3">
               <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-amber-100 flex items-center justify-center text-base sm:text-lg shrink-0">
                 🎯
@@ -102,7 +114,10 @@ export default function HeroSection() {
             </div>
           </Float>
 
-          <Float delay={1.2} className="absolute top-4 sm:top-6 right-3 sm:right-8">
+          <Float
+            delay={1.2}
+            className="absolute top-4 sm:top-6 right-3 sm:right-8"
+          >
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg px-3 py-2.5 sm:px-5 sm:py-4 flex items-center gap-2 sm:gap-3">
               <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-100 flex items-center justify-center text-base sm:text-lg shrink-0">
                 ✅

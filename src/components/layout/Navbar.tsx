@@ -4,6 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { GraduationCap, Menu, X } from "lucide-react";
+import AuthBtn from "@/components/layout/authBtn";
+
+// ============================================================
+// TODO (for you, later): replace this with the real check.
+// If the BetterAuth session exists -> logged in (true),
+// otherwise -> false. Change it to `true` for now if you want
+// to preview the logged-in navbar design.
+// ============================================================
+const isLoggedIn = false;
 
 // Links shown to everyone in the navbar
 const navLinks = [
@@ -47,20 +56,27 @@ export default function Navbar() {
           ))}
         </ul>
 
-        {/* Desktop buttons (guest state for now) */}
+        {/* Desktop right side: logged-in view OR guest buttons */}
         <div className="hidden lg:flex items-center gap-3">
-          <Link
-            href="/sign-in"
-            className="px-5 py-2.5 rounded-lg font-semibold text-slate-700 border border-slate-300 hover:border-emerald-600 hover:text-emerald-600 transition-colors"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/sign-up"
-            className="px-5 py-2.5 rounded-lg font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
-          >
-            Sign Up
-          </Link>
+          {isLoggedIn ? (
+            // TODO (for you, later): this shows the real session user
+            <AuthBtn />
+          ) : (
+            <>
+              <Link
+                href="/sign-in"
+                className="px-5 py-2.5 rounded-lg font-semibold text-slate-700 border border-slate-300 hover:border-emerald-600 hover:text-emerald-600 transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/sign-up"
+                className="px-5 py-2.5 rounded-lg font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu button */}
@@ -99,20 +115,29 @@ export default function Navbar() {
               ))}
             </ul>
             <div className="flex gap-3 mt-4">
-              <Link
-                href="/sign-in"
-                onClick={closeMenu}
-                className="flex-1 text-center px-5 py-2.5 rounded-lg font-semibold text-slate-700 border border-slate-300"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/sign-up"
-                onClick={closeMenu}
-                className="flex-1 text-center px-5 py-2.5 rounded-lg font-semibold text-white bg-emerald-600"
-              >
-                Sign Up
-              </Link>
+              {/* TODO (for you, later): when logged in, show the user's
+                  avatar + Dashboard / Update Profile / Sign Out here
+                  instead of the two guest buttons */}
+              {isLoggedIn ? (
+                <AuthBtn />
+              ) : (
+                <>
+                  <Link
+                    href="/sign-in"
+                    onClick={closeMenu}
+                    className="flex-1 text-center px-5 py-2.5 rounded-lg font-semibold text-slate-700 border border-slate-300"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/sign-up"
+                    onClick={closeMenu}
+                    className="flex-1 text-center px-5 py-2.5 rounded-lg font-semibold text-white bg-emerald-600"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </motion.div>
         )}
