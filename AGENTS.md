@@ -1,3 +1,30 @@
+# MentorLagbe — Client
+
+Next.js tuition/mentorship platform (Programming Hero Assignment 9). All app code lives under `src/app` (App Router). Backend is a **separate git repo** in the sibling directory `../mentor-lagbe-server` (Express + MongoDB); this client calls it over HTTP via `NEXT_PUBLIC_API_URL` — never create API routes here that duplicate backend logic.
+
+## Commands
+
+- `npm run dev` — dev server (Turbopack is the default in Next 16; no `--turbopack` flag needed)
+- `npm run build` — production build; this is the real verification step (catches `cacheComponents` violations)
+- `npm run lint` — ESLint 9 flat config (`eslint.config.mjs`, next/core-web-vitals + typescript presets)
+- `npx tsc --noEmit` — typecheck (there is **no** `typecheck` script)
+
+## Toolchain gotchas
+
+- **`cacheComponents: true` is enabled** in `next.config.ts` (along with `reactCompiler` and `partialPrefetching`). Components doing dynamic data fetching must be wrapped in `<Suspense>` or use `use cache`; prerendering a page that awaits uncached data without Suspense fails the build. This is not in older Next.js tutorials.
+- `params` and `searchParams` are **Promises** in Next 16 — `await` them in pages/routes.
+- Path alias `@/*` → `./src/*` (see `tsconfig.json`). TypeScript is strict.
+- **HeroUI v3** (not v2/NextUI): no `HeroUIProvider` exists or is needed — styles are loaded once via `@import "@heroui/styles"` at the top of `src/app/globals.css`. Import components directly from `@heroui/react`. Do not follow NextUI/HeroUI v2 provider examples.
+- Tailwind v4 (CSS-first): theme tokens live in `@theme` blocks in `globals.css`; there is no `tailwind.config.js`.
+
+## Environment
+
+- Secrets/config go in `.env.local` (gitignored via `.env*`); only `NEXT_PUBLIC_*` vars are exposed to the browser. No env files are committed.
+
+## Stale-block note
+
+`next-env.d.ts` is auto-generated and gitignored; do not edit or commit it.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know
