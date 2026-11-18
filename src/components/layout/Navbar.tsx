@@ -6,14 +6,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { GraduationCap, Menu, X } from "lucide-react";
 import AuthBtn from "@/components/layout/authBtn";
-
-// ============================================================
-// TODO (for you, later): replace this with the real check.
-// If the BetterAuth session exists -> logged in (true),
-// otherwise -> false. Change it to `true` for now if you want
-// to preview the logged-in navbar design.
-// ============================================================
-const isLoggedIn = false;
+import { authClient } from "@/lib/auth-client";
 
 // Links shown to everyone in the navbar
 const navLinks = [
@@ -29,6 +22,15 @@ export default function Navbar() {
 
   // Current route path, used to highlight the active link
   const pathname = usePathname();
+
+  // ---- Login check ---------------------------------------------
+  // Read the real BetterAuth session:
+  //   - session exists  -> user is logged in  -> show AuthBtn
+  //   - no session      -> user is a guest    -> show Sign In / Sign Up
+  // While isPending (session still loading) we show NEITHER, so the
+  // guest buttons never flash for a user who is actually logged in.
+  const { data: session, isPending } = authClient.useSession();
+  const isLoggedIn = !!session?.user;
 
   // Closes the menu when a link inside it is clicked
   const closeMenu = () => setMenuOpen(false);
@@ -83,10 +85,12 @@ export default function Navbar() {
 
         {/* Desktop right side: logged-in view OR guest buttons */}
         <div className="hidden lg:flex items-center gap-3">
-          {isLoggedIn ? (
-            // TODO (for you, later): this shows the real session user
+          {isPending ? null : isLoggedIn ? (
+            // Logged in -> avatar, name, role badge, Dashboard,
+            // Update Profile and Sign Out (all real, from the session)
             <AuthBtn />
           ) : (
+            // Guest -> Sign In / Sign Up buttons
             <>
               <Link
                 href="/sign-in"
@@ -139,14 +143,15 @@ export default function Navbar() {
                 </li>
               ))}
             </ul>
-            <div className="flex gap-3 mt-4">
-              {/* TODO (for you, later): when logged in, show the user's
-                  avatar + Dashboard / Update Profile / Sign Out here
-                  instead of the two guest buttons */}
-              {isLoggedIn ? (
-                <AuthBtn />
+            {/* Same login check as the desktop side. The account menu
+                is a HeroUI Popover now, so no special mobile layout is
+                needed — onNavigate closes this menu when the user
+                picks Dashboard / Update Profile inside the popover */}
+            <div className="mt-4">
+              {isPending ? null : isLoggedIn ? (
+                <AuthBtn onNavigate={closeMenu} />
               ) : (
-                <>
+                <div className="flex gap-3">
                   <Link
                     href="/sign-in"
                     onClick={closeMenu}
@@ -161,7 +166,7 @@ export default function Navbar() {
                   >
                     Sign Up
                   </Link>
-                </>
+                </div>
               )}
             </div>
           </motion.div>

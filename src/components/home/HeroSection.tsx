@@ -92,7 +92,8 @@ export default function HeroSection() {
             alt="Students learning together"
             width={480}
             height={480}
-            className="w-full h-72 sm:h-96 lg:h-[480px] object-cover rounded-3xl shadow-xl text-black"
+            loading="eager"
+            className="w-full h-auto  sm:h-96 lg:h-[480px] object-cover rounded-3xl shadow-xl text-black"
           />
 
           {/* Floating mini cards on top of the image (they gently bob).

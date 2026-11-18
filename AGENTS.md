@@ -17,6 +17,7 @@ Next.js tuition/mentorship platform (Programming Hero Assignment 9). All app cod
 - **HeroUI v3** (not v2/NextUI): no `HeroUIProvider` exists or is needed — styles are loaded once via `@import "@heroui/styles"` at the top of `src/app/globals.css`. Import components directly from `@heroui/react`. Do not follow NextUI/HeroUI v2 provider examples.
 - **Fonts**: Geist Sans / Geist Mono load via `next/font/google` in `src/app/layout.tsx`. Apply the font with the arbitrary utility `font-[family-name:var(--font-geist-sans)]` on `<body>` — the `@theme inline` mapping of `--font-sans: var(--font-geist-sans)` compiles to a broken circular variable in this setup, so `font-sans` utilities are unreliable here.
 - Tailwind v4 (CSS-first): theme tokens live in `@theme` blocks in `globals.css`; there is no `tailwind.config.js`.
+- **Dev server terminal output is logged to `.next/dev/logs/next-development.log`** (JSON lines, includes browser-side runtime errors echoed as `source: "Browser"`). When the user says "the error is in the terminal", read the tail of this file instead of asking them to paste it.
 
 ## Environment
 
