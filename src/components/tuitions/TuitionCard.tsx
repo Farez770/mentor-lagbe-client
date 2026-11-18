@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MapPin, CalendarDays, ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 // ============================================================
 // The shape (fields) of ONE tuition listing.
@@ -32,7 +33,7 @@ export default function TuitionCard({ tuition }: { tuition: Tuition }) {
       {/* ---- Top: image with two badges on it ---- */}
       <div className="relative">
         {/* Card cover photo */}
-        <img
+        <Image
           src={tuition.image}
           alt={tuition.title}
           className="h-48 w-full object-cover"
