@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { GraduationCap, Menu, X } from "lucide-react";
 import AuthBtn from "@/components/layout/authBtn";
@@ -26,8 +27,32 @@ export default function Navbar() {
   // Used only to open/close the mobile menu
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Current route path, used to highlight the active link
+  const pathname = usePathname();
+
   // Closes the menu when a link inside it is clicked
   const closeMenu = () => setMenuOpen(false);
+
+  // Returns true when a nav link matches the current page
+  function isActiveLink(href: string) {
+    // Hash links like "/#how-it-works" are never marked active
+    if (href.includes("#")) {
+      return false;
+    }
+    // Home is active only on the exact home page
+    if (href === "/") {
+      return pathname === "/";
+    }
+    // Other links are active on their own page and sub-pages
+    return pathname === href || pathname.startsWith(href + "/");
+  }
+
+  // Shared link styling so desktop and mobile look the same
+  function getLinkClass(href: string) {
+    return isActiveLink(href)
+      ? "text-emerald-600 font-semibold bg-emerald-50"
+      : "text-slate-600 font-medium hover:text-emerald-600";
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
@@ -42,13 +67,13 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop navigation links */}
-        <ul className="hidden lg:flex items-center gap-8">
+        {/* Desktop navigation links (active link is highlighted green) */}
+        <ul className="hidden lg:flex items-center gap-2">
           {navLinks.map((link) => (
             <li key={link.name}>
               <Link
                 href={link.href}
-                className="text-slate-600 font-medium hover:text-emerald-600 transition-colors"
+                className={`px-4 py-2 rounded-lg transition-colors ${getLinkClass(link.href)}`}
               >
                 {link.name}
               </Link>
@@ -107,7 +132,7 @@ export default function Navbar() {
                   <Link
                     href={link.href}
                     onClick={closeMenu}
-                    className="block py-3 px-2 rounded-lg text-slate-700 font-medium hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                    className={`block py-3 px-3 rounded-lg transition-colors ${getLinkClass(link.href)}`}
                   >
                     {link.name}
                   </Link>

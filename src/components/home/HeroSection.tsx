@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Search, Users, BookOpen, Award } from "lucide-react";
 import FadeIn from "@/components/shared/FadeIn";
 import Float from "@/components/shared/Float";
+import Image from "next/image";
 
 export default function HeroSection() {
   return (
@@ -86,9 +87,11 @@ export default function HeroSection() {
 
         {/* Right: image side with entrance animation and floating cards */}
         <FadeIn delay={0.3} className="relative">
-          <img
-            src="https://images.unsplash.com/photo-1522202176988-66273c81fd05?w=800&q=80"
+          <Image
+            src="/bannar-img.png"
             alt="Students learning together"
+            width={480}
+            height={480}
             className="w-full h-72 sm:h-96 lg:h-[480px] object-cover rounded-3xl shadow-xl text-black"
           />
 
