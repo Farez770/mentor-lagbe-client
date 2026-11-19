@@ -8,6 +8,7 @@ import {
   CalendarDays,
   GraduationCap,
   Loader2,
+  Lock,
   MapPin,
   Monitor,
 } from "lucide-react";
@@ -84,6 +85,19 @@ export default function TuitionDetails({ id }: { id: string }) {
   // APPLY MODAL — the real application form
   // ============================================================
   const { data: session, isPending } = authClient.useSession();
+
+  // ============================================================
+  // ROLE RULE (project requirement): ONLY students may apply.
+  // A signed-in tutor or admin gets a DISABLED Apply button
+  // with a notice (the server answers 403 as well). While the
+  // session is still loading nothing is blocked yet.
+  // Missing role counts as "student", same as verifyToken.
+  // (Cast to plain string: the DB can also hold "admin", which
+  // the BetterAuth type union doesn't list.)
+  // ============================================================
+  const role = (session?.user?.role as string | undefined) || "student";
+  const isBlocked = !isPending && !!session && role !== "student";
+
   const [applyOpen, setApplyOpen] = useState(false);
   const [applyPending, setApplyPending] = useState(false);
   // true after THIS browser sent an application (the server
@@ -373,13 +387,32 @@ export default function TuitionDetails({ id }: { id: string }) {
               />
             </ul>
 
+            {/* NOTICE for tutors / admins — requirement: the
+                Apply button is disabled for every non-student
+                role and a notice explains why. */}
+            {isBlocked && (
+              <p className="mt-6 flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs font-medium leading-relaxed text-amber-700 ring-1 ring-amber-200">
+                <Lock size={14} className="mt-0.5 shrink-0" />
+                <span>
+                  Only student accounts can apply for tuitions. You&apos;re
+                  signed in as a{" "}
+                  <span className="font-bold">
+                    {role === "admin" ? "Admin" : "Tutor"}
+                  </span>
+                  .
+                </span>
+              </p>
+            )}
+
             {/* APPLY BUTTON — opens the HeroUI application modal.
-                Signed-out visitors just get a friendly toast. */}
+                Signed-out visitors just get a friendly toast;
+                tutors / admins see it DISABLED (see notice). */}
             <button
               type="button"
-              disabled={hasApplied}
+              disabled={hasApplied || isBlocked}
               onClick={() => {
                 if (isPending) return; // session still loading — wait
+                if (isBlocked) return; // safety — already disabled
                 if (!session) {
                   toast.warning("Please sign in first to apply");
                   return;
@@ -408,7 +441,9 @@ export default function TuitionDetails({ id }: { id: string }) {
             <p className="mt-2 text-center text-xs text-slate-400">
               {hasApplied
                 ? "The tutor will review your application"
-                : "Send a short form — the tutor reviews it in their dashboard"}
+                : isBlocked
+                  ? "Applying is disabled for your account type"
+                  : "Send a short form — the tutor reviews it in their dashboard"}
             </p>
           </div>
         </div>

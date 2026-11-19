@@ -85,7 +85,10 @@ export default function Footer() {
           <ul className="space-y-3 text-sm">
             {quickLinks.map((link) => (
               <li key={link.name}>
-                <Link href={link.href} className="hover:text-emerald-400 transition-colors">
+                <Link
+                  href={link.href}
+                  className="hover:text-emerald-400 transition-colors"
+                >
                   {link.name}
                 </Link>
               </li>
@@ -107,7 +110,7 @@ export default function Footer() {
             </li>
             <li className="flex items-start gap-3">
               <MapPin className="w-4 h-4 mt-1 text-emerald-400 shrink-0" />
-              <span>Dhanmondi, Dhaka, Bangladesh</span>
+              <span>Bakalia, Chattogram, Bangladesh</span>
             </li>
           </ul>
         </div>
