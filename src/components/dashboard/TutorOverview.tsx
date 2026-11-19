@@ -1,5 +1,20 @@
-import { BookOpen, BadgeCheck, Users, Sparkles } from "lucide-react";
+"use client";
+
+// "use client" is needed because this page passes icon COMPONENTS
+// (functions) to DashboardDrawer, and only client components may
+// receive functions as props.
+import {
+  BookOpen,
+  BadgeCheck,
+  Users,
+  Sparkles,
+  LayoutDashboard,
+  UserCog,
+  Home,
+  FilePlus,
+} from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
+import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
 
 // ============================================================
 // DEMO TUTOR DATA (design only — no backend yet).
@@ -12,6 +27,34 @@ const demoTutor = {
   name: "Rahat Karim", // shown in the "Welcome back" heading
   plan: "Free", // "Free" or "Pro" (requirement: Current Plan card)
 };
+
+// ============================================================
+// All sections shown inside the tutor's LEFT SIDEBAR.
+// The first three routes are required by the project spec:
+//   1. /dashboard/tutor/post-tuition  (Post a Tuition Page)
+//   2. /dashboard/tutor/my-tuitions   (My Created Tuitions — Full CRUD)
+//   3. /dashboard/tutor/applicants    (Manage Applicants)
+// Overview and Back to Home work right now; every page marked
+// "TODO later" is not built yet — it will show a 404 until you
+// create it (same approach as the navbar links).
+// ============================================================
+const tutorSections = [
+  { name: "Overview", href: "/dashboard/tutor", icon: LayoutDashboard }, // works now ✅
+  {
+    name: "Post a Tuition",
+    href: "/dashboard/tutor/post-tuition",
+    icon: FilePlus,
+  }, // TODO later: create this page (tuition form)
+  { name: "My Tuitions", href: "/dashboard/tutor/my-tuitions", icon: BookOpen }, // TODO later: create this page (full CRUD)
+  {
+    name: "Manage Applicants",
+    href: "/dashboard/tutor/applicants",
+    icon: Users,
+  }, // TODO later: create this page (approve/reject)
+  { name: "Update Profile", href: "/dashboard/profile", icon: UserCog }, // TODO later: create this page
+  { name: "Upgrade to Pro", href: "/pricing", icon: Sparkles }, // TODO later: create the pricing page
+  { name: "Back to Home", href: "/", icon: Home }, // works now ✅
+];
 
 // ============================================================
 // The 4 stats required by the project:
@@ -66,70 +109,98 @@ const stats = [
 // ============================================================
 // Tutor Dashboard — Overview page content:
 // welcome header + the 4 reusable stats cards.
+// Everything is wrapped in <DashboardDrawer> — the shell with
+// the fixed-height aside; this content lives in the scrollable
+// right column (the site navbar + footer are hidden here).
 // ============================================================
 export default function TutorOverview() {
   return (
-    <section className="bg-slate-50 py-10 md:py-14">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* ====================================================
-            WELCOME HEADER (green gradient banner)
-            ==================================================== */}
-        <div className="rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-600 p-6 md:p-8 text-white shadow-lg">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            {/* Greeting text */}
-            <div>
-              {/* Small eyebrow label above the heading */}
-              <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-xs font-semibold tracking-wide">
-                Tutor Dashboard
-              </span>
-              {/* Demo name — later this comes from the session user */}
-              <h1 className="mt-3 text-2xl md:text-3xl font-extrabold">
-                Welcome back, {demoTutor.name}! 👋
-              </h1>
-              <p className="mt-2 text-sm md:text-base text-emerald-50">
-                Here is a quick overview of your tuition listings and
-                applicants.
-              </p>
-            </div>
+    // No top padding — the content starts flush at the very
+    // top of the right column. pb-6 only leaves a little
+    // breathing room at the bottom when you scroll to the end.
+    <section className="bg-slate-50 pb-6">
+      {/* ====================================================
+          DashboardDrawer = the dashboard SHELL:
+            - left <aside> sidebar with a fixed height that
+              never moves
+            - right column = the ONLY scrollable area; it
+              shows this page content and changes when the
+              route changes
+          On dashboard pages the site navbar and footer are
+          hidden (see the :has() rule in globals.css), so the
+          shell fills the whole screen — body never scrolls.
+          ==================================================== */}
+      <DashboardDrawer
+        title="Tutor Dashboard"
+        sections={tutorSections}
+        // Demo logged-in user for the sidebar's user card.
+        // TODO (for you, later): replace with the real session
+        // user (name, role, plan) from BetterAuth.
+        user={{ name: demoTutor.name, role: "Tutor", plan: demoTutor.plan }}
+      >
+        <div className="max-w-7xl mx-auto px-4 mt-16">
+          {/* ====================================================
+              WELCOME HEADER (green gradient banner)
+              py-6 = a small, tidy gap below the navbar
+              (the old py-10 / md:py-14 looked too airy)
+              ==================================================== */}
+          <div className="rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white shadow-lg">
+            <div className="flex flex-wrap items-center justify-between gap-6">
+              {/* Greeting text */}
+              <div>
+                {/* Small eyebrow label above the heading */}
+                <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-xs font-semibold tracking-wide">
+                  Tutor Dashboard
+                </span>
+                {/* Demo name — later this comes from the session user */}
+                <h1 className="mt-3 text-2xl md:text-3xl font-extrabold">
+                  Welcome back, {demoTutor.name}! 👋
+                </h1>
+                <p className="mt-2 text-sm md:text-base text-emerald-50">
+                  Here is a quick overview of your tuition listings and
+                  applicants.
+                </p>
+              </div>
 
-            {/* Demo avatar — first letter of the tutor's name */}
-            <span className="hidden sm:flex h-16 w-16 items-center justify-center rounded-full border-4 border-white/30 bg-white/15 text-2xl font-extrabold">
-              {demoTutor.name.charAt(0)}
-            </span>
+              {/* Demo avatar — first letter of the tutor's name */}
+              <span className="hidden sm:flex h-16 w-16 items-center justify-center rounded-full border-4 border-white/30 bg-white/15 text-2xl font-extrabold">
+                {demoTutor.name.charAt(0)}
+              </span>
+            </div>
+          </div>
+
+          {/* ====================================================
+              STATS GRID — the 4 required cards.
+              1 column on mobile, 2 on tablet, 4 on desktop.
+              ==================================================== */}
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {stats.map((stat) => (
+              <StatCard
+                key={stat.id}
+                icon={stat.icon}
+                label={stat.label}
+                value={stat.value}
+                sub={stat.sub}
+                dot={stat.dot}
+                accent={stat.accent}
+                // Only the Plan card gets the Upgrade button
+                action={
+                  stat.label === "Current Plan" && demoTutor.plan === "Free" ? (
+                    // TODO (for you, later): wire this button to the
+                    // Pro payment flow (payments collection) later.
+                    <button
+                      type="button"
+                      className="w-full cursor-pointer rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-amber-600"
+                    >
+                      ⭐ Upgrade to Pro
+                    </button>
+                  ) : undefined
+                }
+              />
+            ))}
           </div>
         </div>
-
-        {/* ====================================================
-            STATS GRID — the 4 required cards.
-            1 column on mobile, 2 on tablet, 4 on desktop.
-            ==================================================== */}
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {stats.map((stat) => (
-            <StatCard
-              key={stat.id}
-              icon={stat.icon}
-              label={stat.label}
-              value={stat.value}
-              sub={stat.sub}
-              dot={stat.dot}
-              accent={stat.accent}
-              // Only the Plan card gets the Upgrade button
-              action={
-                stat.label === "Current Plan" && demoTutor.plan === "Free" ? (
-                  // TODO (for you, later): wire this button to the
-                  // Pro payment flow (payments collection) later.
-                  <button
-                    type="button"
-                    className="w-full cursor-pointer rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-amber-600"
-                  >
-                    ⭐ Upgrade to Pro
-                  </button>
-                ) : undefined
-              }
-            />
-          ))}
-        </div>
-      </div>
+      </DashboardDrawer>
     </section>
   );
 }
