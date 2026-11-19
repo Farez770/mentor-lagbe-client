@@ -77,3 +77,34 @@ export type StudentStats = {
 export function getStudentStats() {
   return apiFetch<{ stats: StudentStats }>("/api/applications/stats");
 }
+
+// ============================================================
+// One row of the "My Applications" list
+// ============================================================
+export type MyApplication = {
+  id: string;
+  tuitionId: string; // used for the link to the details page
+  tuitionTitle: string;
+  tutorName: string;
+  tutorEmail: string;
+  fee: number | null; // null when the tuition was deleted
+  appliedAt: string; // ISO date string, e.g. "2026-11-19T..."
+  status: "pending" | "accepted" | "rejected";
+};
+
+// GET /api/applications/mine — every application I sent
+// (login required, student role). The backend joins the
+// tutor name/email and the fee for each row.
+export function getMyApplications() {
+  return apiFetch<{ applications: MyApplication[] }>(
+    "/api/applications/mine",
+  );
+}
+
+// DELETE /api/applications/:id — cancel MY OWN application.
+// The server only allows this while the status is "pending".
+export function cancelApplication(id: string) {
+  return apiFetch<{ message: string }>(`/api/applications/${id}`, {
+    method: "DELETE",
+  });
+}
