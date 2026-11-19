@@ -73,3 +73,27 @@ export function getTuitionStats() {
 export function getTuition(id: string) {
   return apiFetch<{ tuition: PostedTuition }>(`/api/tuitions/${id}`);
 }
+
+// PATCH /api/tuitions/:id — edit a tuition's details
+// (approvalStatus is untouched: only the admin changes it)
+export function updateTuition(id: string, input: CreateTuitionInput) {
+  return apiFetch<{ message: string; tuition: PostedTuition }>(
+    `/api/tuitions/${id}`,
+    { method: "PATCH", body: JSON.stringify(input) },
+  );
+}
+
+// PATCH /api/tuitions/:id/toggle — switch Active <-> Closed
+export function toggleTuition(id: string) {
+  return apiFetch<{ message: string; tuition: PostedTuition }>(
+    `/api/tuitions/${id}/toggle`,
+    { method: "PATCH" },
+  );
+}
+
+// DELETE /api/tuitions/:id — remove a tuition post
+export function deleteTuition(id: string) {
+  return apiFetch<{ message: string }>(`/api/tuitions/${id}`, {
+    method: "DELETE",
+  });
+}

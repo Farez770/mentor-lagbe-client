@@ -29,7 +29,7 @@ export const demoTutor = {
 // All sections shown inside the tutor's LEFT SIDEBAR.
 // The first three routes are required by the project spec:
 //   1. /dashboard/tutor/post-tuition  (Post a Tuition Page) ✅
-//   2. /dashboard/tutor/my-tuitions   (My Created Tuitions — TODO)
+//   2. /dashboard/tutor/my-tuitions   (My Created Tuitions ✅)
 //   3. /dashboard/tutor/applicants    (Manage Applicants — TODO)
 // ============================================================
 export const tutorSections = [
@@ -39,7 +39,7 @@ export const tutorSections = [
     href: "/dashboard/tutor/post-tuition",
     icon: FilePlus,
   }, // works now ✅ (form + real API)
-  { name: "My Tuitions", href: "/dashboard/tutor/my-tuitions", icon: BookOpen }, // TODO later: create this page (full CRUD)
+  { name: "My Tuitions", href: "/dashboard/tutor/my-tuitions", icon: BookOpen }, // works now ✅ (list + edit/toggle/delete)
   {
     name: "Manage Applicants",
     href: "/dashboard/tutor/applicants",
