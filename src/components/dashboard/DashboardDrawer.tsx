@@ -20,12 +20,14 @@ export type DashboardSection = {
 };
 
 // The person shown in the sidebar's user card.
-// TODO (for you, later): fill this from the real BetterAuth
-// session instead of the demo values the page passes in.
+// The drawer fills this from the real BetterAuth session
+// automatically — the value the page passes in is only a
+// fallback shown while the session is still loading.
 export type DashboardUser = {
   name: string; // e.g. "Rahat Karim"
   role: string; // e.g. "Tutor" / "Student" / "Admin"
   plan: string; // "Free" or "Pro" (Pro shows a premium badge)
+  image?: string; // profile photo (no image → first letter avatar)
 };
 
 // ============================================================
@@ -116,11 +118,20 @@ function SidebarContent({
           [2] USER CARD — avatar + name + role + premium badge
           ====================================================== */}
       <div className="flex items-center gap-3 border-b border-slate-100 p-4">
-        {/* Demo avatar: first letter of the name.
-            TODO (later): show the real session avatar here. */}
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-lg font-extrabold text-emerald-700">
-          {user.name.charAt(0)}
-        </span>
+        {/* Profile photo from the session — falls back to the
+            first letter of the name when there is no image */}
+        {user.image ? (
+          // eslint-disable-next-line @next/next/no-img-element -- profile photos can come from any domain
+          <img
+            src={user.image}
+            alt={user.name}
+            className="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-emerald-100"
+          />
+        ) : (
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-lg font-extrabold text-emerald-700">
+            {user.name.charAt(0)}
+          </span>
+        )}
 
         <div className="min-w-0">
           {/* User name */}
@@ -201,6 +212,11 @@ function SidebarContent({
   );
 }
 
+// "tutor" -> "Tutor", "free" -> "Free", "pro" -> "Pro"
+function capitalize(value: string) {
+  return value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
+}
+
 export default function DashboardDrawer({
   title,
   sections,
@@ -209,11 +225,30 @@ export default function DashboardDrawer({
 }: {
   title: string; // e.g. "Tutor Dashboard"
   sections: DashboardSection[]; // the routes to show
-  user: DashboardUser; // who is logged in (demo data for now)
+  user: DashboardUser; // fallback shown while the session loads
   children: ReactNode; // the page content (changes per route)
 }) {
   // Is the mobile / tablet menu open?
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // ============================================================
+  // THE REAL LOGGED-IN USER (BetterAuth session).
+  // Every useSession() call in the app shares ONE cached
+  // request, so this costs nothing extra if the navbar already
+  // loaded it. The demo user the page passes in stays visible
+  // only for the moment before the session arrives.
+  // ============================================================
+  const { data: session } = authClient.useSession();
+  const sessionUser = session?.user;
+
+  const shownUser: DashboardUser = sessionUser
+    ? {
+        name: sessionUser.name,
+        role: capitalize(String(sessionUser.role ?? "student")),
+        plan: capitalize(String(sessionUser.plan ?? "free")),
+        image: sessionUser.image || undefined,
+      }
+    : user;
 
   return (
     // The shell fills the whole screen — the body never scrolls
@@ -229,7 +264,7 @@ export default function DashboardDrawer({
         <SidebarContent
           title={title}
           sections={sections}
-          user={user}
+          user={shownUser}
           // Desktop has no overlay to close — this is a no-op
           onNavigate={() => setIsMenuOpen(false)}
         />
@@ -266,9 +301,18 @@ export default function DashboardDrawer({
           </div>
 
           {/* Small avatar so the user still sees who they are */}
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-extrabold text-emerald-700">
-            {user.name.charAt(0)}
-          </span>
+          {shownUser.image ? (
+            // eslint-disable-next-line @next/next/no-img-element -- profile photos can come from any domain
+            <img
+              src={shownUser.image}
+              alt=""
+              className="h-8 w-8 shrink-0 rounded-full object-cover"
+            />
+          ) : (
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-extrabold text-emerald-700">
+              {shownUser.name.charAt(0)}
+            </span>
+          )}
         </div>
 
         {/* ---- PAGE CONTENT — the only scrollable area ----
@@ -301,7 +345,7 @@ export default function DashboardDrawer({
         <SidebarContent
           title={title}
           sections={sections}
-          user={user}
+          user={shownUser}
           onNavigate={() => setIsMenuOpen(false)} // close after a link click
           onClose={() => setIsMenuOpen(false)} // ✕ button
         />

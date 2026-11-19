@@ -7,7 +7,8 @@ import type { auth } from "@/lib/auth";
 
 export const authClient = createAuthClient({
   /** The base URL of the server (optional if you're using the same domain) */
-  baseURL: "http://localhost:3000",
+  // baseURL: "http://localhost:3000",
+  baseURL: process.env.BETTER_AUTH_URL,
   // Tells TypeScript about our custom user fields (role, plan, phone, bio)
   // so authClient.signUp.email({ role: "tutor" }) type-checks correctly
   plugins: [inferAdditionalFields<typeof auth>()],

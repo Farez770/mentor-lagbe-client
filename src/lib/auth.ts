@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { bearer } from "better-auth/plugins";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 
@@ -71,6 +72,16 @@ export const auth = betterAuth({
       },
     },
   },
+
+  // ============================================================
+  // BEARER PLUGIN — lets our Express server (mentor-lagbe-server)
+  // verify a login. The browser gets the session token from
+  // authClient.getSession() and sends it as
+  //   Authorization: Bearer <token>
+  // The server forwards that header to BetterAuth's get-session
+  // endpoint to check the user is really logged in.
+  // ============================================================
+  plugins: [bearer()],
 
   // ============================================================
   // Runs right BEFORE a new user is written to MongoDB.

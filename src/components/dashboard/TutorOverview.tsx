@@ -8,53 +8,13 @@ import {
   BadgeCheck,
   Users,
   Sparkles,
-  LayoutDashboard,
-  UserCog,
-  Home,
-  FilePlus,
 } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
-
-// ============================================================
-// DEMO TUTOR DATA (design only — no backend yet).
-// TODO (for you, later): replace these values with the real
-// logged-in tutor from the BetterAuth session and real numbers
-// fetched from the API, for example:
-//   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tuitions/stats`);
-// ============================================================
-const demoTutor = {
-  name: "Rahat Karim", // shown in the "Welcome back" heading
-  plan: "Free", // "Free" or "Pro" (requirement: Current Plan card)
-};
-
-// ============================================================
-// All sections shown inside the tutor's LEFT SIDEBAR.
-// The first three routes are required by the project spec:
-//   1. /dashboard/tutor/post-tuition  (Post a Tuition Page)
-//   2. /dashboard/tutor/my-tuitions   (My Created Tuitions — Full CRUD)
-//   3. /dashboard/tutor/applicants    (Manage Applicants)
-// Overview and Back to Home work right now; every page marked
-// "TODO later" is not built yet — it will show a 404 until you
-// create it (same approach as the navbar links).
-// ============================================================
-const tutorSections = [
-  { name: "Overview", href: "/dashboard/tutor", icon: LayoutDashboard }, // works now ✅
-  {
-    name: "Post a Tuition",
-    href: "/dashboard/tutor/post-tuition",
-    icon: FilePlus,
-  }, // TODO later: create this page (tuition form)
-  { name: "My Tuitions", href: "/dashboard/tutor/my-tuitions", icon: BookOpen }, // TODO later: create this page (full CRUD)
-  {
-    name: "Manage Applicants",
-    href: "/dashboard/tutor/applicants",
-    icon: Users,
-  }, // TODO later: create this page (approve/reject)
-  { name: "Update Profile", href: "/dashboard/profile", icon: UserCog }, // TODO later: create this page
-  { name: "Upgrade to Pro", href: "/pricing", icon: Sparkles }, // TODO later: create the pricing page
-  { name: "Back to Home", href: "/", icon: Home }, // works now ✅
-];
+// The sidebar sections + demo tutor are shared with the other
+// tutor pages (Post a Tuition, My Tuitions, ...) — see tutorData.ts
+import { demoTutor, tutorSections } from "@/components/dashboard/tutorData";
+import { authClient } from "@/lib/auth-client";
 
 // ============================================================
 // The 4 stats required by the project:
@@ -114,6 +74,17 @@ const stats = [
 // right column (the site navbar + footer are hidden here).
 // ============================================================
 export default function TutorOverview() {
+  // ============================================================
+  // THE REAL LOGGED-IN USER (BetterAuth session).
+  // Every useSession() call in the app shares ONE cached
+  // request — the drawer + navbar already ask for it, so this
+  // is free. The greeting and avatar show the real name/photo;
+  // the stats numbers below are still demo data (their TODOs).
+  // ============================================================
+  const { data: session } = authClient.useSession();
+  const displayName = session?.user?.name ?? demoTutor.name;
+  const displayImage = session?.user?.image || undefined;
+
   return (
     // No top padding — the content starts flush at the very
     // top of the right column. pb-6 only leaves a little
@@ -133,9 +104,9 @@ export default function TutorOverview() {
       <DashboardDrawer
         title="Tutor Dashboard"
         sections={tutorSections}
-        // Demo logged-in user for the sidebar's user card.
-        // TODO (for you, later): replace with the real session
-        // user (name, role, plan) from BetterAuth.
+        // Fallback user shown for a moment while the session
+        // loads — the drawer swaps in the REAL logged-in user
+        // (name, role, plan, photo) automatically.
         user={{ name: demoTutor.name, role: "Tutor", plan: demoTutor.plan }}
       >
         <div className="max-w-7xl mx-auto px-4 mt-16">
@@ -152,9 +123,9 @@ export default function TutorOverview() {
                 <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-xs font-semibold tracking-wide">
                   Tutor Dashboard
                 </span>
-                {/* Demo name — later this comes from the session user */}
+                {/* Real name from the session (demo until it loads) */}
                 <h1 className="mt-3 text-2xl md:text-3xl font-extrabold">
-                  Welcome back, {demoTutor.name}! 👋
+                  Welcome back, {displayName}! 👋
                 </h1>
                 <p className="mt-2 text-sm md:text-base text-emerald-50">
                   Here is a quick overview of your tuition listings and
@@ -162,10 +133,19 @@ export default function TutorOverview() {
                 </p>
               </div>
 
-              {/* Demo avatar — first letter of the tutor's name */}
-              <span className="hidden sm:flex h-16 w-16 items-center justify-center rounded-full border-4 border-white/30 bg-white/15 text-2xl font-extrabold">
-                {demoTutor.name.charAt(0)}
-              </span>
+              {/* Real profile photo — falls back to the first letter */}
+              {displayImage ? (
+                // eslint-disable-next-line @next/next/no-img-element -- profile photos can come from any domain
+                <img
+                  src={displayImage}
+                  alt={displayName}
+                  className="hidden h-16 w-16 rounded-full border-4 border-white/30 object-cover sm:block"
+                />
+              ) : (
+                <span className="hidden h-16 w-16 items-center justify-center rounded-full border-4 border-white/30 bg-white/15 text-2xl font-extrabold sm:flex">
+                  {displayName.charAt(0)}
+                </span>
+              )}
             </div>
           </div>
 
