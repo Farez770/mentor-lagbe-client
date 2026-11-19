@@ -61,3 +61,19 @@ export function updateApplicationStatus(
     },
   );
 }
+
+// ============================================================
+// Student Overview numbers (the 4 dashboard stat cards)
+// ============================================================
+export type StudentStats = {
+  totalApplied: number; // Total Applied Tuitions
+  accepted: number; // Accepted Applications
+  pending: number; // Pending Applications
+  plan: string; // Current Plan: "free" | "pro"
+};
+
+// GET /api/applications/stats — MY application counts
+// (login required, student role)
+export function getStudentStats() {
+  return apiFetch<{ stats: StudentStats }>("/api/applications/stats");
+}

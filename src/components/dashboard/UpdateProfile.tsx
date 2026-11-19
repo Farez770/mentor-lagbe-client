@@ -7,6 +7,7 @@ import DashboardDrawer, {
   type DashboardSection,
 } from "@/components/dashboard/DashboardDrawer";
 import { demoTutor, tutorSections } from "@/components/dashboard/tutorData";
+import { studentSections } from "@/components/dashboard/studentData";
 import { authClient } from "@/lib/auth-client";
 import { uploadToImgBB } from "@/lib/imgbb";
 import { updateProfile, type ProfileForm } from "@/lib/api/profile";
@@ -26,9 +27,9 @@ import { updateProfile, type ProfileForm } from "@/lib/api/profile";
 //   navbar + sidebar show the new name / photo at once.
 // ============================================================
 
-// Minimal sidebar for students/admins — their dashboards are
-// not built yet, so they only get the Profile link itself.
-// TODO (student dashboard): replace with the real student menu.
+// Minimal sidebar for roles that don't have their own dashboard
+// yet — they only get the Profile link itself.
+// TODO (admin dashboard): replace with the real admin menu.
 const basicSections: DashboardSection[] = [
   { name: "Update Profile", href: "/dashboard/profile", icon: UserCog },
 ];
@@ -144,9 +145,14 @@ export default function UpdateProfile() {
   };
 
   // Which sidebar menu fits the current role (tutors keep their
-  // full dashboard menu; everyone else gets the minimal one)
+  // full menu, students get theirs, everyone else the minimal one)
+  const role = session?.user?.role;
   const sections =
-    session?.user?.role === "tutor" ? tutorSections : basicSections;
+    role === "tutor"
+      ? tutorSections
+      : role === "student"
+        ? studentSections
+        : basicSections;
 
   // Picture preview: newly picked file > saved URL > letter avatar
   const shownImage = filePreview || current.image;

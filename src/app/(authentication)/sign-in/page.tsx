@@ -75,10 +75,9 @@ const SignInPage = () => {
       // Tutors land on their dashboard
       router.push("/dashboard/tutor");
     } else {
-      // Students land on the home page for now.
-      // TODO (Phase 3.5 of the roadmap): change this to
-      // "/dashboard/student" once the student dashboard exists.
-      router.push("/");
+      // Students land on THEIR dashboard (Overview page with
+      // the 4 stats cards)
+      router.push("/dashboard/student");
     }
 
     // Refresh server components so the navbar picks up the
