@@ -67,3 +67,9 @@ export type TutorStats = {
 export function getTuitionStats() {
   return apiFetch<TutorStats>("/api/tuitions/stats");
 }
+
+// GET /api/tuitions/:id — ONE tuition's full details
+// (used by the /tuitions/[id] view details page)
+export function getTuition(id: string) {
+  return apiFetch<{ tuition: PostedTuition }>(`/api/tuitions/${id}`);
+}

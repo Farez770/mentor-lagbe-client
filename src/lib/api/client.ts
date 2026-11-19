@@ -43,12 +43,16 @@ export async function apiFetch<T>(
   const body = await res.json().catch(() => null);
 
   // 4) not OK → throw the server's message (e.g. the
-  //    "Free plan allows up to 2 tuitions" limit message)
+  //    "Free plan allows up to 2 tuitions" limit message).
+  //    The HTTP status is attached too, so callers can react
+  //    to it (the details page shows "not found" on a 404).
   if (!res.ok) {
-    throw new Error(
+    const error = new Error(
       (body as { message?: string } | null)?.message ??
         `Request failed (${res.status})`,
-    );
+    ) as Error & { status?: number };
+    error.status = res.status;
+    throw error;
   }
 
   return body as T;
