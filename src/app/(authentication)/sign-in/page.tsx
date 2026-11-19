@@ -74,6 +74,12 @@ const SignInPage = () => {
     if (data.user.role === "tutor") {
       // Tutors land on their dashboard
       router.push("/dashboard/tutor");
+    } else if ((data.user.role as string) === "admin") {
+      // Admins land on the ADMIN dashboard (Overview with the
+      // platform stats cards). Cast needed because "admin"
+      // lives in the DB but not in the BetterAuth type union
+      // ["student", "tutor"] (see additionalFields.role).
+      router.push("/dashboard/admin");
     } else {
       // Students land on THEIR dashboard (Overview page with
       // the 4 stats cards)

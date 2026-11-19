@@ -8,6 +8,7 @@ import DashboardDrawer, {
 } from "@/components/dashboard/DashboardDrawer";
 import { demoTutor, tutorSections } from "@/components/dashboard/tutorData";
 import { studentSections } from "@/components/dashboard/studentData";
+import { adminSections } from "@/components/dashboard/adminData";
 import { authClient } from "@/lib/auth-client";
 import { uploadToImgBB } from "@/lib/imgbb";
 import { updateProfile, type ProfileForm } from "@/lib/api/profile";
@@ -27,9 +28,8 @@ import { updateProfile, type ProfileForm } from "@/lib/api/profile";
 //   navbar + sidebar show the new name / photo at once.
 // ============================================================
 
-// Minimal sidebar for roles that don't have their own dashboard
-// yet — they only get the Profile link itself.
-// TODO (admin dashboard): replace with the real admin menu.
+// Final fallback for any unknown role — only the Profile link.
+// Every real role (tutor, student, admin) has its own menu.
 const basicSections: DashboardSection[] = [
   { name: "Update Profile", href: "/dashboard/profile", icon: UserCog },
 ];
@@ -144,15 +144,19 @@ export default function UpdateProfile() {
     }
   };
 
-  // Which sidebar menu fits the current role (tutors keep their
-  // full menu, students get theirs, everyone else the minimal one)
-  const role = session?.user?.role;
+  // Which sidebar menu fits the current role — each role has
+  // its own menu now, anything unexpected gets the fallback.
+  // Cast to string: "admin" exists in the DB but not in the
+  // BetterAuth type union ["student", "tutor"].
+  const role = session?.user?.role as string | undefined;
   const sections =
     role === "tutor"
       ? tutorSections
       : role === "student"
         ? studentSections
-        : basicSections;
+        : role === "admin"
+          ? adminSections
+          : basicSections;
 
   // Picture preview: newly picked file > saved URL > letter avatar
   const shownImage = filePreview || current.image;
