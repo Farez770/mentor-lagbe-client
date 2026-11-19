@@ -1,4 +1,4 @@
-import { Home, LayoutDashboard, UserCog } from "lucide-react";
+import { Home, LayoutDashboard, UserCog, Users } from "lucide-react";
 
 // ============================================================
 // Shared data for EVERY admin dashboard page.
@@ -17,12 +17,14 @@ export const demoAdmin = {
 
 // ============================================================
 // All sections in the admin's LEFT SIDEBAR.
-//   1. /dashboard/admin (Overview)          ✅ this step
-//   2. /dashboard/profile (Update Profile)  ✅
-// TODO (later): "Approve Tuitions" + "Manage Users" pages
+//   1. /dashboard/admin (Overview)          ✅
+//   2. /dashboard/admin/users (User Mgmt)   ✅ this step
+//   3. /dashboard/profile (Update Profile)  ✅
+// TODO (later): "Approve Tuitions" page
 // ============================================================
 export const adminSections = [
   { name: "Overview", href: "/dashboard/admin", icon: LayoutDashboard }, // works now ✅
+  { name: "User Management", href: "/dashboard/admin/users", icon: Users }, // works now ✅
   { name: "Update Profile", href: "/dashboard/profile", icon: UserCog }, // works now ✅
   { name: "Back to Home", href: "/", icon: Home }, // works now ✅
 ];
