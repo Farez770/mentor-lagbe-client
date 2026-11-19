@@ -6,7 +6,7 @@ import BrowseTuitions from "@/components/tuitions/BrowseTuitions";
 export const metadata: Metadata = {
   title: "Browse Tuitions | MentorLagbe",
   description:
-    "Search and filter all admin-approved and active tuition listings by subject, class level and mode.",
+    "Search and filter live tuition listings by subject, class level and mode.",
 };
 
 // The /tuitions page.

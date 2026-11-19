@@ -1,5 +1,5 @@
 import HeroSection from "@/components/home/HeroSection";
-// import FeaturedTuitions from "@/components/home/FeaturedTuitions";
+import FeaturedTuitions from "@/components/home/FeaturedTuitions";
 import HowItWorks from "@/components/home/HowItWorks";
 import TopSubjects from "@/components/home/TopSubjects";
 import PricingSection from "@/components/home/PricingSection";
@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <>
       <HeroSection />
-      {/* <FeaturedTuitions /> */}
+      <FeaturedTuitions />
       <HowItWorks />
       <TopSubjects />
       <PricingSection />

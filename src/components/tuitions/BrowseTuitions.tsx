@@ -1,160 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { Search, ChevronDown, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Search, ChevronDown, X, Loader2 } from "lucide-react";
 import SectionHeading from "@/components/shared/SectionHeading";
 import FadeIn from "@/components/shared/FadeIn";
 import TuitionCard, { type Tuition } from "@/components/tuitions/TuitionCard";
+import { getTuitions } from "@/lib/api/tuitions";
 
 // ============================================================
-// DEMO TUITION DATA (design only — no backend yet).
-// Every item already has status "approved" and isActive true,
-// because the requirement says the Browse page only shows
-// listings that the Admin approved AND that are active.
+// REAL TUITION DATA — fetched from GET /api/tuitions
+// (the old 9-item demo array is gone; the grid below shows
+// whatever tutors have actually posted to the database)
 // ============================================================
-// TODO (for you, later): when the backend is ready, delete this
-// array and fetch real data instead, for example:
-//   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tuitions`);
-//   const tuitions = await res.json();
-// (the API should already return only approved + active listings)
-// ============================================================
-const tuitions: Tuition[] = [
-  {
-    id: 1,
-    title: "Class 9-10 Physics Crash Batch",
-    subject: "Physics",
-    classLevel: "Class 9-10",
-    mode: "Online",
-    fee: 2500,
-    days: 3,
-    location: "Online (Zoom)",
-    tutor: "Rahat Karim",
-    image:
-      "https://images.unsplash.com/photo-1636466024490-28f0b46a5b5c?w=600&q=80",
-    status: "approved",
-    isActive: true,
-  },
-  {
-    id: 2,
-    title: "SSC Math Special Care Batch",
-    subject: "Mathematics",
-    classLevel: "Class 9-10",
-    mode: "Offline",
-    fee: 3000,
-    days: 4,
-    location: "Dhanmondi, Dhaka",
-    tutor: "Nusrat Jahan",
-    image:
-      "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=600&q=80",
-    status: "approved",
-    isActive: true,
-  },
-  {
-    id: 3,
-    title: "HSC Chemistry Masterclass",
-    subject: "Chemistry",
-    classLevel: "Class 11-12",
-    mode: "Online",
-    fee: 3500,
-    days: 3,
-    location: "Online (Google Meet)",
-    tutor: "Tanvir Ahmed",
-    image:
-      "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=600&q=80",
-    status: "approved",
-    isActive: true,
-  },
-  {
-    id: 4,
-    title: "English Grammar Foundation Batch",
-    subject: "English",
-    classLevel: "Class 6-8",
-    mode: "Offline",
-    fee: 2000,
-    days: 2,
-    location: "Uttara, Dhaka",
-    tutor: "Farhana Islam",
-    image:
-      "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&q=80",
-    status: "approved",
-    isActive: true,
-  },
-  {
-    id: 5,
-    title: "JavaScript & React for Beginners",
-    subject: "Programming",
-    classLevel: "Adults",
-    mode: "Online",
-    fee: 4000,
-    days: 3,
-    location: "Online (Zoom)",
-    tutor: "Mahin Hasan",
-    image:
-      "https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=600&q=80",
-    status: "approved",
-    isActive: true,
-  },
-  {
-    id: 6,
-    title: "IELTS Guaranteed 7+ Band Program",
-    subject: "IELTS",
-    classLevel: "Adults",
-    mode: "Online",
-    fee: 6000,
-    days: 5,
-    location: "Online (Zoom)",
-    tutor: "Sadia Rahman",
-    image:
-      "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&q=80",
-    status: "approved",
-    isActive: true,
-  },
-  {
-    id: 7,
-    title: "HSC Biology 1st Part Suggestion",
-    subject: "Biology",
-    classLevel: "Class 11-12",
-    mode: "Offline",
-    fee: 3200,
-    days: 4,
-    location: "Mirpur, Dhaka",
-    tutor: "Imran Hossain",
-    image:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&q=80",
-    status: "approved",
-    isActive: true,
-  },
-  {
-    id: 8,
-    title: "Class 6-8 Bangla Writing Practice",
-    subject: "Bangla",
-    classLevel: "Class 6-8",
-    mode: "Online",
-    fee: 1800,
-    days: 2,
-    location: "Online (Zoom)",
-    tutor: "Sumaiya Akter",
-    image:
-      "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80",
-    status: "approved",
-    isActive: true,
-  },
-  {
-    id: 9,
-    title: "ICT Admission Prep (Public University)",
-    subject: "ICT",
-    classLevel: "Admission",
-    mode: "Offline",
-    fee: 4500,
-    days: 5,
-    location: "Farmgate, Dhaka",
-    tutor: "Shakib Rahman",
-    image:
-      "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&q=80",
-    status: "approved",
-    isActive: true,
-  },
-];
 
 // ============================================================
 // The Browse Tuitions page content:
@@ -170,6 +27,55 @@ export default function BrowseTuitions() {
   const [subject, setSubject] = useState("all");
   const [classLevel, setClassLevel] = useState("all");
   const [mode, setMode] = useState("all");
+
+  // ============================================================
+  // REAL tuitions from GET /api/tuitions.
+  // The list starts empty and isLoading shows a spinner until
+  // the API answers (or the empty state on failure).
+  // ============================================================
+  const [tuitions, setTuitions] = useState<Tuition[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // "alive" = ignore the answer if the page was left first
+    let alive = true;
+
+    getTuitions()
+      .then((data) => {
+        if (!alive) return;
+        // The API shape (tutorName, approvalStatus) is mapped
+        // to the card's shape (tutor, status)
+        setTuitions(
+          data.tuitions.map((item) => ({
+            id: item.id,
+            title: item.title,
+            subject: item.subject,
+            classLevel: item.classLevel,
+            mode: item.mode,
+            fee: item.fee,
+            days: item.days,
+            location: item.location,
+            tutor: item.tutorName,
+            image: item.image,
+            status: item.approvalStatus,
+            isActive: item.isActive,
+          })),
+        );
+      })
+      .catch((err) => {
+        // e.g. API server not running → show the empty state
+        console.warn("Could not load tuitions:", err);
+        if (alive) setTuitions([]);
+      })
+      .finally(() => {
+        if (alive) setIsLoading(false);
+      });
+
+    // cleanup: never set state after unmount
+    return () => {
+      alive = false;
+    };
+  }, []); // [] = run once when the page opens
 
   // ---- Build the dropdown options from the data itself ----
   // new Set(...) removes duplicate values, the spread [...set]
@@ -191,8 +97,10 @@ export default function BrowseTuitions() {
   // ---- The filtering (this is the heart of the page) ----
   // Keep a tuition only when it passes EVERY check below.
   const filteredTuitions = tuitions.filter((tuition) => {
-    // 1) Requirement: only Admin-approved AND active listings
-    if (tuition.status !== "approved" || !tuition.isActive) return false;
+    // 1) Only live listings. TODO (Phase 5): the API will
+    //    return ONLY approved tuitions once the admin approval
+    //    flow exists — until then every active post shows here.
+    if (!tuition.isActive) return false;
 
     // 2) Search box: the keyword must appear in the title,
     //    subject, tutor name or class level (or box is empty)
@@ -244,7 +152,7 @@ export default function BrowseTuitions() {
         <SectionHeading
           tagline="Browse Tuitions"
           title="Find Your Perfect Tuition"
-          description="Search and filter all approved tuition listings by subject, class level and mode — only live, admin-approved tuitions are shown here."
+          description="Search and filter live tuition listings by subject, class level and mode — everything you see here is a real, active tuition post."
         />
 
         {/* ====================================================
@@ -345,11 +253,17 @@ export default function BrowseTuitions() {
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
             {/* Live result counter */}
             <p className="text-sm text-slate-600">
-              Showing{" "}
-              <span className="font-bold text-slate-900">
-                {filteredTuitions.length}
-              </span>{" "}
-              of {tuitions.length} approved tuitions
+              {isLoading ? (
+                "Loading tuitions…"
+              ) : (
+                <>
+                  Showing{" "}
+                  <span className="font-bold text-slate-900">
+                    {filteredTuitions.length}
+                  </span>{" "}
+                  of {tuitions.length} tuitions
+                </>
+              )}
             </p>
 
             {/* Clear button only appears when a filter is active */}
@@ -367,9 +281,27 @@ export default function BrowseTuitions() {
         </FadeIn>
 
         {/* ====================================================
-            RESULTS: grid of cards, or the empty state
+            RESULTS: loading spinner → "nothing posted yet" →
+            "no match for your filters" → the grid
             ==================================================== */}
-        {filteredTuitions.length === 0 ? (
+        {isLoading ? (
+          /* ---- Still fetching from the API ---- */
+          <div className="flex flex-col items-center gap-3 py-20 text-slate-500">
+            <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+            <p className="text-sm font-medium">Loading tuitions…</p>
+          </div>
+        ) : tuitions.length === 0 ? (
+          /* ---- The API has no active tuitions at all ---- */
+          <FadeIn className="rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
+            <Search className="mx-auto h-10 w-10 text-slate-300" />
+            <h3 className="mt-4 text-lg font-bold text-slate-900">
+              No tuitions available yet
+            </h3>
+            <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
+              There are no live tuition listings right now — check back soon!
+            </p>
+          </FadeIn>
+        ) : filteredTuitions.length === 0 ? (
           /* ---- Empty state: nothing matched the search/filters ---- */
           <FadeIn className="rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
             <Search className="mx-auto h-10 w-10 text-slate-300" />

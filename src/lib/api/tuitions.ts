@@ -2,7 +2,7 @@ import { apiFetch } from "./client";
 
 // ============================================================
 // Every function that calls the tuitions API of the Express
-// server (mentor-lagbe-server/src/routes/tuitions.ts).
+// server (the single ../mentor-lagbe-server/index.js file).
 // Pages/components NEVER call fetch() directly — they import
 // these functions instead.
 // ============================================================
@@ -47,4 +47,23 @@ export function createTuition(input: CreateTuitionInput) {
 // (used for the "X of 2 posts used" counter)
 export function getMyTuitions() {
   return apiFetch<{ tuitions: PostedTuition[] }>("/api/tuitions/mine");
+}
+
+// GET /api/tuitions — the PUBLIC list (Browse Tuitions page),
+// newest first. No login needed.
+export function getTuitions() {
+  return apiFetch<{ tuitions: PostedTuition[] }>("/api/tuitions");
+}
+
+// The four numbers shown on the tutor Overview dashboard
+export type TutorStats = {
+  total: number; // every tuition this tutor posted
+  approved: number; // approved + live listings
+  pending: number; // waiting for admin approval
+  applicants: number; // students who applied (0 until built)
+};
+
+// GET /api/tuitions/stats — real counts for the overview cards
+export function getTuitionStats() {
+  return apiFetch<TutorStats>("/api/tuitions/stats");
 }

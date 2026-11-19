@@ -9,62 +9,24 @@ import {
   Users,
   Sparkles,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import StatCard from "@/components/dashboard/StatCard";
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
 // The sidebar sections + demo tutor are shared with the other
 // tutor pages (Post a Tuition, My Tuitions, ...) — see tutorData.ts
 import { demoTutor, tutorSections } from "@/components/dashboard/tutorData";
 import { authClient } from "@/lib/auth-client";
+import { getTuitionStats, type TutorStats } from "@/lib/api/tuitions";
 
 // ============================================================
 // The 4 stats required by the project:
-//   1. Total Tuitions Posted
-//   2. Active / Approved Tuitions
-//   3. Total Applicants Received
-//   4. Current Plan: Free / Pro
-// Every value below is demo information — UI design only.
+//   1. Total Tuitions Posted      -> GET /api/tuitions/stats
+//   2. Active / Approved Tuitions -> GET /api/tuitions/stats
+//   3. Total Applicants Received  -> 0 until the apply flow
+//   4. Current Plan               -> the real session plan
+// The numbers are fetched inside the component below — this
+// file no longer has any hardcoded demo values.
 // ============================================================
-const stats = [
-  {
-    id: 1,
-    label: "Total Tuitions Posted",
-    value: "12", // demo: all tuitions this tutor ever posted
-    sub: "3 waiting for admin approval",
-    dot: "bg-amber-500", // amber dot = something is pending
-    accent: "emerald" as const,
-    icon: BookOpen,
-  },
-  {
-    id: 2,
-    label: "Active / Approved Tuitions",
-    value: "8", // demo: approved + active listings
-    sub: "67% of your tuitions are live",
-    dot: "bg-emerald-500", // green dot = all good
-    accent: "teal" as const,
-    icon: BadgeCheck,
-  },
-  {
-    id: 3,
-    label: "Total Applicants Received",
-    value: "47", // demo: students who applied to this tutor's tuitions
-    sub: "+9 new applicants this week",
-    dot: "bg-teal-500",
-    accent: "amber" as const,
-    icon: Users,
-  },
-  {
-    id: 4,
-    label: "Current Plan",
-    value: demoTutor.plan, // "Free" for this demo account
-    sub:
-      demoTutor.plan === "Free"
-        ? "Upgrade to post more tuitions"
-        : "Pro benefits are active",
-    dot: "bg-rose-500",
-    accent: "rose" as const,
-    icon: Sparkles,
-  },
-];
 
 // ============================================================
 // Tutor Dashboard — Overview page content:
@@ -78,12 +40,117 @@ export default function TutorOverview() {
   // THE REAL LOGGED-IN USER (BetterAuth session).
   // Every useSession() call in the app shares ONE cached
   // request — the drawer + navbar already ask for it, so this
-  // is free. The greeting and avatar show the real name/photo;
-  // the stats numbers below are still demo data (their TODOs).
+  // is free. The greeting and avatar show the real name/photo.
   // ============================================================
   const { data: session } = authClient.useSession();
   const displayName = session?.user?.name ?? demoTutor.name;
   const displayImage = session?.user?.image || undefined;
+
+  // ============================================================
+  // THE REAL NUMBERS (GET /api/tuitions/stats).
+  // null = still loading → the cards show "…" until the API
+  // answers. If the request fails we show zeros instead.
+  // ============================================================
+  const [statsData, setStatsData] = useState<TutorStats | null>(null);
+
+  useEffect(() => {
+    // "alive" = ignore the answer if the page was left first
+    let alive = true;
+
+    getTuitionStats()
+      .then((data) => {
+        if (alive) setStatsData(data);
+      })
+      .catch((err) => {
+        // e.g. API server not running, or not signed in
+        console.warn("Could not load tuition stats:", err);
+        if (alive) {
+          setStatsData({ total: 0, approved: 0, pending: 0, applicants: 0 });
+        }
+      });
+
+    // cleanup: never set state after unmount
+    return () => {
+      alive = false;
+    };
+  }, []); // [] = run once when the page opens
+
+  // Shortcuts to the loaded numbers (undefined while loading)
+  const total = statsData?.total;
+  const approved = statsData?.approved;
+  const pending = statsData?.pending;
+  const applicants = statsData?.applicants;
+
+  // What % of this tutor's tuitions are live right now
+  // (guard against dividing by zero when total is 0/undefined)
+  const livePercent =
+    total && total > 0 ? Math.round(((approved ?? 0) / total) * 100) : 0;
+
+  // The session stores the plan lowercase ("free"/"pro") —
+  // the card needs the display form ("Free"/"Pro").
+  // The demo value is only a fallback while the session loads.
+  const plan =
+    String(session?.user?.plan ?? demoTutor.plan).toLowerCase() === "pro"
+      ? "Pro"
+      : "Free";
+
+  // The 4 cards, built from the REAL numbers above
+  const stats = [
+    {
+      id: 1,
+      label: "Total Tuitions Posted",
+      value: total === undefined ? "…" : String(total),
+      sub:
+        pending === undefined
+          ? "Loading your tuitions…"
+          : pending > 0
+            ? `${pending} waiting for admin approval`
+            : "Nothing waiting for approval",
+      // amber dot = something is pending
+      dot: pending ? "bg-amber-500" : "bg-emerald-500",
+      accent: "emerald" as const,
+      icon: BookOpen,
+    },
+    {
+      id: 2,
+      label: "Active / Approved Tuitions",
+      value: approved === undefined ? "…" : String(approved),
+      sub:
+        approved === undefined
+          ? "Loading your tuitions…"
+          : approved > 0
+            ? `${livePercent}% of your tuitions are live`
+            : total && total > 0
+              ? "Waiting for admin approval"
+              : "Post your first tuition to see it here",
+      dot: approved ? "bg-emerald-500" : "bg-amber-500",
+      accent: "teal" as const,
+      icon: BadgeCheck,
+    },
+    {
+      id: 3,
+      label: "Total Applicants Received",
+      value: applicants === undefined ? "…" : String(applicants),
+      // TODO (Phase 3): "+N new this week" once the
+      // applications collection exists
+      sub: "No applications yet",
+      dot: "bg-teal-500",
+      accent: "amber" as const,
+      icon: Users,
+    },
+    {
+      id: 4,
+      label: "Current Plan",
+      value: plan, // real plan from the session (Free/Pro)
+      sub:
+        plan === "Free"
+          ? "Upgrade to post more tuitions"
+          : "Pro benefits are active",
+      dot: "bg-rose-500",
+      accent: "rose" as const,
+      icon: Sparkles,
+    },
+  ];
 
   return (
     // No top padding — the content starts flush at the very
@@ -165,7 +232,7 @@ export default function TutorOverview() {
                 accent={stat.accent}
                 // Only the Plan card gets the Upgrade button
                 action={
-                  stat.label === "Current Plan" && demoTutor.plan === "Free" ? (
+                  stat.label === "Current Plan" && plan === "Free" ? (
                     // TODO (for you, later): wire this button to the
                     // Pro payment flow (payments collection) later.
                     <button

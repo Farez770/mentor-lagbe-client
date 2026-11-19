@@ -9,7 +9,9 @@ import Image from "next/image";
 // and isActive true (listing is live) are shown to students.
 // ============================================================
 export type Tuition = {
-  id: number;
+  // string (MongoDB id from the API) — number kept for the
+  // old demo data, so both work in the card's link
+  id: string | number;
   title: string;
   subject: string;
   classLevel: string;
@@ -32,10 +34,16 @@ export default function TuitionCard({ tuition }: { tuition: Tuition }) {
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
       {/* ---- Top: image with two badges on it ---- */}
       <div className="relative">
-        {/* Card cover photo */}
+        {/* Card cover photo.
+            width/height are REQUIRED by next/image — without them
+            it throws "is missing required width property" and the
+            whole page crashes. The real size is controlled by the
+            CSS classes (h-48 w-full) and object-cover crops it. */}
         <Image
           src={tuition.image}
           alt={tuition.title}
+          width={120}
+          height={120}
           className="h-48 w-full object-cover"
         />
         {/* Mode badge: Online = green, Offline = amber (same as home) */}
