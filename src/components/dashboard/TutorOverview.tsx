@@ -3,12 +3,7 @@
 // "use client" is needed because this page passes icon COMPONENTS
 // (functions) to DashboardDrawer, and only client components may
 // receive functions as props.
-import {
-  BookOpen,
-  BadgeCheck,
-  Users,
-  Sparkles,
-} from "lucide-react";
+import { BookOpen, BadgeCheck, Users, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import StatCard from "@/components/dashboard/StatCard";
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
@@ -182,8 +177,8 @@ export default function TutorOverview() {
               py-6 = a small, tidy gap below the navbar
               (the old py-10 / md:py-14 looked too airy)
               ==================================================== */}
-          <div className="rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white shadow-lg">
-            <div className="flex flex-wrap items-center justify-between gap-6">
+          <div className="rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white shadow-lg">
+            <div className="flex flex-wrap items-center justify-between gap-6 px-7">
               {/* Greeting text */}
               <div>
                 {/* Small eyebrow label above the heading */}
@@ -235,6 +230,7 @@ export default function TutorOverview() {
                   stat.label === "Current Plan" && plan === "Free" ? (
                     // TODO (for you, later): wire this button to the
                     // Pro payment flow (payments collection) later.
+
                     <button
                       type="button"
                       className="w-full cursor-pointer rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-amber-600"

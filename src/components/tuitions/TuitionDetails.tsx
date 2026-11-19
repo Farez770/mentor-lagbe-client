@@ -11,8 +11,10 @@ import {
   MapPin,
   Monitor,
 } from "lucide-react";
-import { toast } from "@heroui/react";
+import { Modal, toast } from "@heroui/react";
+import { authClient } from "@/lib/auth-client";
 import { getTuition, type PostedTuition } from "@/lib/api/tuitions";
+import { applyForTuition } from "@/lib/api/applications";
 
 // ============================================================
 // TUITION VIEW DETAILS (/tuitions/[id])
@@ -77,6 +79,72 @@ export default function TuitionDetails({ id }: { id: string }) {
       alive = false;
     };
   }, [id]); // re-run if the id ever changes
+
+  // ============================================================
+  // APPLY MODAL — the real application form
+  // ============================================================
+  const { data: session, isPending } = authClient.useSession();
+  const [applyOpen, setApplyOpen] = useState(false);
+  const [applyPending, setApplyPending] = useState(false);
+  // true after THIS browser sent an application (the server
+  // also blocks duplicates, so a reload stays safe)
+  const [hasApplied, setHasApplied] = useState(false);
+  const [applyForm, setApplyForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    schedule: "",
+    note: "",
+  });
+
+  // update one field of the application form
+  const updateApply = (key: keyof typeof applyForm, value: string) =>
+    setApplyForm((f) => ({ ...f, [key]: value }));
+
+  // validate -> POST /api/applications -> toast + close
+  const onApplySubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // client-side checks (the server checks them again)
+    if (applyForm.name.trim().length < 2) {
+      toast.warning("Please enter your name");
+      return;
+    }
+    if (!applyForm.email.includes("@")) {
+      toast.warning("Please enter a valid email");
+      return;
+    }
+    if (!applyForm.phone.trim()) {
+      toast.warning("Please enter your phone number");
+      return;
+    }
+    if (!applyForm.schedule.trim()) {
+      toast.warning("Please enter your preferred schedule");
+      return;
+    }
+
+    setApplyPending(true);
+    try {
+      const result = await applyForTuition({
+        tuitionId: id,
+        studentName: applyForm.name.trim(),
+        studentEmail: applyForm.email.trim(),
+        studentPhone: applyForm.phone.trim(),
+        preferredSchedule: applyForm.schedule.trim(),
+        note: applyForm.note.trim(),
+      });
+      toast.success(result.message || "Application sent!");
+      setHasApplied(true);
+      setApplyOpen(false); // close the modal
+    } catch (err) {
+      // e.g. "You have already applied to this tuition"
+      toast.warning(
+        err instanceof Error ? err.message : "Could not send application",
+      );
+    } finally {
+      setApplyPending(false);
+    }
+  };
 
   // ---- shared piece: the "back" link on every state ----
   const backLink = (
@@ -180,6 +248,10 @@ export default function TuitionDetails({ id }: { id: string }) {
       : tuition.approvalStatus === "rejected"
         ? "bg-rose-600"
         : "bg-amber-500";
+
+  // Same input styles as the sign-in / post-tuition forms
+  const inputClass =
+    "h-10 w-full rounded-lg border border-emerald-300 bg-white px-3 text-sm text-gray-800 shadow-sm outline-none transition-all placeholder:text-gray-500 hover:border-emerald-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100";
 
   return (
     <section className="bg-slate-50 py-10 md:py-14">
@@ -301,25 +373,171 @@ export default function TuitionDetails({ id }: { id: string }) {
               />
             </ul>
 
-            {/* Apply button — the application flow arrives in
-                Phase 3 (applications collection), so for now it
-                shows a friendly toast instead of doing nothing */}
+            {/* APPLY BUTTON — opens the HeroUI application modal.
+                Signed-out visitors just get a friendly toast. */}
             <button
               type="button"
-              onClick={() =>
-                toast.warning(
-                  "Applications open soon — this arrives in the next step!",
-                )
-              }
-              className="mt-6 w-full cursor-pointer rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-700"
+              disabled={hasApplied}
+              onClick={() => {
+                if (isPending) return; // session still loading — wait
+                if (!session) {
+                  toast.warning("Please sign in first to apply");
+                  return;
+                }
+                // Prefill name / email (and phone if the profile has
+                // one) HERE, at click time — an event handler may set
+                // state, while React's new lint rules disallow doing
+                // it directly inside a useEffect.
+                const u = session.user as {
+                  name?: string;
+                  email?: string;
+                  phone?: string;
+                };
+                setApplyForm((f) => ({
+                  ...f,
+                  name: f.name || u.name || "",
+                  email: f.email || u.email || "",
+                  phone: f.phone || u.phone || "",
+                }));
+                setApplyOpen(true);
+              }}
+              className="mt-6 w-full cursor-pointer rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-400"
             >
-              Apply Now
+              {hasApplied ? "✓ Application Sent" : "Apply Now"}
             </button>
             <p className="mt-2 text-center text-xs text-slate-400">
-              Students will be able to apply from this page
+              {hasApplied
+                ? "The tutor will review your application"
+                : "Send a short form — the tutor reviews it in their dashboard"}
             </p>
           </div>
         </div>
+
+        {/* ==================================================
+            APPLY MODAL (HeroUI) — the real application form.
+            The button above only OPENS it; the application is
+            sent when the student presses "Send Application".
+            ================================================== */}
+        <Modal
+          isOpen={applyOpen}
+          onOpenChange={(open) => {
+            if (!open) setApplyOpen(false);
+          }}
+        >
+          <Modal.Backdrop>
+            <Modal.Container placement="center">
+              <Modal.Dialog>
+                <Modal.Header>
+                  <Modal.Heading>Apply for this tuition</Modal.Heading>
+                </Modal.Header>
+                <Modal.Body>
+                  <p className="mb-3 text-sm text-slate-600">
+                    {tuition.title} · by {tuition.tutorName}
+                  </p>
+
+                  <form
+                    id="apply-form"
+                    onSubmit={onApplySubmit}
+                    className="grid gap-3 sm:grid-cols-2"
+                  >
+                    {/* ---------- Your Name ---------- */}
+                    <label className="block">
+                      <span className="text-sm font-semibold text-gray-800">
+                        Your Name *
+                      </span>
+                      <input
+                        value={applyForm.name}
+                        onChange={(e) => updateApply("name", e.target.value)}
+                        placeholder="e.g. Rahat Karim"
+                        className={inputClass}
+                      />
+                    </label>
+
+                    {/* ---------- Email ---------- */}
+                    <label className="block">
+                      <span className="text-sm font-semibold text-gray-800">
+                        Email *
+                      </span>
+                      <input
+                        type="email"
+                        value={applyForm.email}
+                        onChange={(e) => updateApply("email", e.target.value)}
+                        placeholder="you@example.com"
+                        className={inputClass}
+                      />
+                    </label>
+
+                    {/* ---------- Phone ---------- */}
+                    <label className="block">
+                      <span className="text-sm font-semibold text-gray-800">
+                        Phone *
+                      </span>
+                      <input
+                        value={applyForm.phone}
+                        onChange={(e) => updateApply("phone", e.target.value)}
+                        placeholder="e.g. 017XXXXXXXX"
+                        className={inputClass}
+                      />
+                    </label>
+
+                    {/* ---------- Preferred Schedule ---------- */}
+                    <label className="block">
+                      <span className="text-sm font-semibold text-gray-800">
+                        Preferred Schedule *
+                      </span>
+                      <input
+                        value={applyForm.schedule}
+                        onChange={(e) =>
+                          updateApply("schedule", e.target.value)
+                        }
+                        placeholder="e.g. Sat–Wed, 7:00 PM"
+                        className={inputClass}
+                      />
+                    </label>
+
+                    {/* ---------- Note (optional) ---------- */}
+                    <label className="block sm:col-span-2">
+                      <span className="text-sm font-semibold text-gray-800">
+                        Note{" "}
+                        <span className="font-normal text-gray-400">
+                          (optional)
+                        </span>
+                      </span>
+                      <textarea
+                        rows={3}
+                        value={applyForm.note}
+                        onChange={(e) => updateApply("note", e.target.value)}
+                        placeholder="Why are you a good fit? Anything the tutor should know..."
+                        className={inputClass + " h-auto py-2"}
+                      />
+                    </label>
+                  </form>
+                </Modal.Body>
+                <Modal.Footer>
+                  <div className="flex w-full justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setApplyOpen(false)}
+                      disabled={applyPending}
+                      className="cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Cancel
+                    </button>
+                    {/* form="apply-form" submits the form in Modal.Body */}
+                    <button
+                      type="submit"
+                      form="apply-form"
+                      disabled={applyPending}
+                      className="cursor-pointer rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {applyPending ? "Sending..." : "Send Application"}
+                    </button>
+                  </div>
+                </Modal.Footer>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>
       </div>
     </section>
   );

@@ -49,9 +49,7 @@ export default function MyTuitions() {
   const [busyId, setBusyId] = useState<string | null>(null);
   // the tuition waiting to be deleted — this state ALSO controls
   // the HeroUI confirm modal (null = modal closed)
-  const [deleteTarget, setDeleteTarget] = useState<PostedTuition | null>(
-    null,
-  );
+  const [deleteTarget, setDeleteTarget] = useState<PostedTuition | null>(null);
 
   // ---------- load MY tuitions once ----------
   useEffect(() => {
@@ -183,8 +181,8 @@ export default function MyTuitions() {
                 Could not load your tuitions
               </h2>
               <p className="mx-auto mt-1.5 max-w-md text-sm text-slate-600">
-                Something went wrong while talking to the server. Check that
-                the API server is running, then try again.
+                Something went wrong while talking to the server. Check that the
+                API server is running, then try again.
               </p>
               <button
                 type="button"
