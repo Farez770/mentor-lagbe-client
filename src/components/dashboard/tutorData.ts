@@ -45,7 +45,7 @@ export const tutorSections = [
     href: "/dashboard/tutor/applicants",
     icon: Users,
   }, // works now ✅ (list + accept/reject)
-  { name: "Update Profile", href: "/dashboard/profile", icon: UserCog }, // TODO later: create this page
+  { name: "Update Profile", href: "/dashboard/profile", icon: UserCog }, // works now ✅ (any role)
   { name: "Upgrade to Pro", href: "/pricing", icon: Sparkles }, // TODO later: create the pricing page
   { name: "Back to Home", href: "/", icon: Home }, // works now ✅
 ];

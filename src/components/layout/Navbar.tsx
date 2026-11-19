@@ -32,6 +32,16 @@ export default function Navbar() {
   const { data: session, isPending } = authClient.useSession();
   const isLoggedIn = !!session?.user;
 
+  // ---- Dashboard pages have NO site navbar (project rule) ----
+  // Keyed to the ACTIVE route: Next.js 16 Cache Components keeps
+  // hidden routes in the DOM (instant back navigation), so a CSS
+  // :has(#dashboard-sidebar) check would keep matching leftover
+  // dashboard DOM after navigating away — hiding the navbar on
+  // the home page too. usePathname() only ever reflects the
+  // route that is actually on screen, and it is known during
+  // SSR as well, so there is no flash on a hard load either.
+  if (pathname.startsWith("/dashboard")) return null;
+
   // Closes the menu when a link inside it is clicked
   const closeMenu = () => setMenuOpen(false);
 

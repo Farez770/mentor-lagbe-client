@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { GraduationCap, Mail, Phone, MapPin } from "lucide-react";
 
 // Quick links shown in the footer
@@ -11,6 +14,11 @@ const quickLinks = [
 ];
 
 export default function Footer() {
+  // Same rule as the Navbar: dashboard pages show NO site footer.
+  // Keyed to the active route (see the note in globals.css).
+  const pathname = usePathname();
+  if (pathname.startsWith("/dashboard")) return null;
+
   return (
     <footer className="bg-slate-900 text-slate-300">
       <div className="max-w-7xl mx-auto px-4 py-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">

@@ -137,26 +137,25 @@
 
 /* ============================================================
    DASHBOARD PAGES: no site navbar, no site footer.
-   The dashboard shell (DashboardDrawer) always renders an
-   element with id="dashboard-sidebar" — even in the very
-   first HTML the server sends. So :has() can detect a
-   dashboard page and hide the layout's header (Navbar) and
-   footer (Footer) there, with NO flash and WITHOUT touching
-   layout.tsx. Normal pages (home, tuitions, auth...) never
-   contain that id, so they keep their navbar + footer.
-   ============================================================ */
-body:has(#dashboard-sidebar) > header,
-body:has(#dashboard-sidebar) > footer {
-  display: none;
-}
 
-/* The body itself NEVER scrolls on dashboard pages.
-   The shell (sidebar + content column) is exactly one screen
-   tall, and this locks the page scroll completely — so
-   scrolling can ONLY happen inside the right content column
-   and the left drawer can never move or change. */
-body:has(#dashboard-sidebar) {
-  overflow: hidden;
-  /* extra safety: nothing inside the body can scroll it either */
-  overscroll-behavior: none;
-}
+   This used to be done with CSS:
+     body:has(#dashboard-sidebar) > header/footer { display: none }
+     body:has(#dashboard-sidebar) { overflow: hidden }
+
+   That broke with Next.js 16 Cache Components (cacheComponents
+   is ON in next.config.ts): the router keeps the PREVIOUS route
+   mounted in a hidden React <Activity> for instant back
+   navigation. So after visiting a dashboard page, its hidden
+   DOM (including #dashboard-sidebar) stayed in the document —
+   the rules above kept matching on the HOME page too: the
+   navbar/footer stayed hidden AND the body stayed scroll-
+   locked, so only the hero was visible until a full refresh.
+
+   The hiding now lives in the components themselves, keyed to
+   usePathname() which only ever reflects the ACTIVE route
+   (leftover hidden DOM can never affect it):
+     - Navbar.tsx  -> return null on /dashboard/*
+     - Footer.tsx  -> return null on /dashboard/*
+     - DashboardDrawer.tsx -> locks body scroll in an effect
+       (React runs its cleanup when the route is hidden/gone)
+   ============================================================ */

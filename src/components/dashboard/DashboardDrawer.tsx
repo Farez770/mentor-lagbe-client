@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { GraduationCap, LogOut, Menu, X } from "lucide-react";
@@ -249,6 +249,30 @@ export default function DashboardDrawer({
         image: sessionUser.image || undefined,
       }
     : user;
+
+  // ============================================================
+  // Lock the BODY scroll while a dashboard page is on screen
+  // (project rule: the dashboard shell never scrolls the page).
+  //
+  // This used to be a CSS rule — body:has(#dashboard-sidebar) {
+  // overflow: hidden — but Next.js 16 Cache Components keeps
+  // hidden routes mounted in the DOM, so a leftover sidebar
+  // would keep the HOME page scroll-locked after navigating
+  // away (only the hero visible). An effect works instead:
+  // React runs the cleanup whenever this route is hidden or
+  // unmounted, which restores normal scrolling, and runs the
+  // effect again when the route comes back.
+  // ============================================================
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    const prevOverscroll = document.body.style.overscrollBehavior;
+    document.body.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.overscrollBehavior = prevOverscroll;
+    };
+  }, []);
 
   return (
     // The shell fills the whole screen — the body never scrolls
