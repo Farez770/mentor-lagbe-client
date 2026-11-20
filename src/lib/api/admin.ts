@@ -92,3 +92,28 @@ export function setTuitionApproval(
     body: JSON.stringify({ approvalStatus }), // the decision
   });
 }
+
+// ============================================================
+// One row of the Transaction Management list
+// (a verified Stripe payment from the "payments" collection)
+// ============================================================
+export type AdminTransaction = {
+  id: string; // Mongo _id as a string (React row key)
+  userName: string; // joined from users ("(deleted user)" if gone)
+  userEmail: string; // joined from users (payment's own copy as fallback)
+  role: string; // "student" | "tutor" | "admin" | "unknown"
+  planName: string; // "Pro Tutor Plan" | "Pro Student Plan"
+  amount: number; // whole dollars: 15 or 10
+  currency: string; // "usd"
+  transactionId: string; // Stripe payment intent id (pi_...)
+  paymentDate: string | null; // ISO date the payment was made
+  status: string; // "paid"
+};
+
+// GET /api/admin/transactions — every payment (admin role).
+// The server blocks non-admins with a 403.
+export function getAllTransactions() {
+  return apiFetch<{ transactions: AdminTransaction[] }>(
+    "/api/admin/transactions",
+  );
+}
