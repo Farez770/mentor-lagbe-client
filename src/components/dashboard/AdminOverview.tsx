@@ -125,8 +125,10 @@ export default function AdminOverview() {
     },
     {
       id: 4,
+      // Stripe charges in USD ($10 / $15 cards) — value is in
+      // whole dollars, exactly what /api/payments/verify stores
       label: "Total Stripe Revenue",
-      value: revenue === undefined ? "…" : `৳${revenue.toLocaleString()}`,
+      value: revenue === undefined ? "…" : `$${revenue.toLocaleString()}`,
       sub:
         revenue === undefined
           ? "Loading platform stats…"
