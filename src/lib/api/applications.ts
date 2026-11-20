@@ -26,6 +26,9 @@ export type Application = ApplicationInput & {
   tuitionTitle: string; // snapshot shown in the tutor's inbox
   status: "pending" | "accepted" | "rejected";
   createdAt: string;
+  // PRIORITY BOOKING: the student's CURRENT plan, joined live
+  // from the users collection — "pro" rows are returned first
+  studentPlan: "free" | "pro";
 };
 
 // POST /api/applications — send an application (login required;
@@ -41,7 +44,8 @@ export function applyForTuition(input: ApplicationInput) {
 }
 
 // GET /api/applications/tutor — ALL applications that arrived
-// on MY tuition posts (tutor role required, newest first)
+// on MY tuition posts (tutor role required). PRIORITY BOOKING:
+// Pro students' applications come first, then newest-first.
 export function getTutorApplications() {
   return apiFetch<{ applications: Application[] }>(
     "/api/applications/tutor",

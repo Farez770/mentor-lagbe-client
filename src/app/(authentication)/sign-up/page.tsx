@@ -128,7 +128,8 @@ const SignUpPage = () => {
       // Show the real reason (e.g. email already exists)
       toast.warning(`Sign up failed! ${error.message ?? ""}`);
     }
-
+    form.reset();
+    router.refresh();
     // toast.success("Form submitted successfully!");
   };
 

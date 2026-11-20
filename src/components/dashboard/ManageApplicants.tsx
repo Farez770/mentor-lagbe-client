@@ -130,10 +130,19 @@ export default function ManageApplicants() {
               details and preferred schedule, then accept or reject.
             </p>
             {applications !== null && !loadError && (
-              <p className="mt-2 inline-block rounded-full bg-white px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
-                {applications.length}{" "}
-                {applications.length === 1 ? "application" : "applications"}
-              </p>
+              <span className="mt-2 flex flex-wrap gap-2">
+                <p className="inline-block rounded-full bg-white px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
+                  {applications.length}{" "}
+                  {applications.length === 1 ? "application" : "applications"}
+                </p>
+                {/* PRIORITY BOOKING legend — explains why the
+                    list is ordered the way it is */}
+                {applications.length > 0 && (
+                  <p className="inline-block rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-200">
+                    ⭐ Pro students&apos; applications appear first
+                  </p>
+                )}
+              </span>
             )}
           </div>
 
@@ -194,6 +203,14 @@ export default function ManageApplicants() {
                       <div>
                         <h2 className="font-bold text-[#173D32]">
                           {app.studentName}
+                          {/* PRIORITY BOOKING badge — Pro
+                              students get a golden marker so the
+                              tutor instantly sees who is first */}
+                          {app.studentPlan === "pro" && (
+                            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 align-middle text-[11px] font-bold text-amber-700">
+                              ⭐ Priority
+                            </span>
+                          )}
                         </h2>
                         <p className="text-xs text-gray-500">
                           Applied on {appliedOn(app.createdAt)}
