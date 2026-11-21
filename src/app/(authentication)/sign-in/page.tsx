@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+// ★ REQUIREMENT UPDATE (JWT): grab the signed JWT right after login.
+import { primeJwtToken } from "@/lib/api/client";
 import { useRouter } from "next/navigation";
 
 // ============================================================
@@ -73,6 +75,12 @@ const SignInPage = () => {
       toast.warning(`Sign in failed! ${error.message ?? ""}`);
       return;
     }
+
+    // ★ REQUIREMENT UPDATE (JWT): the session cookie is now available,
+    // so ask Better Auth for a signed JWT. apiFetch will reuse this JWT
+    // for the protected Express API calls. Failure is non-fatal here:
+    // apiFetch can always request a fresh JWT later.
+    await primeJwtToken();
 
     // ---- Success: return to the requested tuition for Student accounts -----
     toast.success(`Welcome back, ${data.user.name}!`);

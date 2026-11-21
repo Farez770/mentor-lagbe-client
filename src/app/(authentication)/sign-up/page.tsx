@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+// ★ REQUIREMENT UPDATE (JWT): grab the signed JWT right after sign-up.
+import { primeJwtToken } from "@/lib/api/client";
 import { useRouter } from "next/navigation";
 
 const SignUpPage = () => {
@@ -117,6 +119,10 @@ const SignUpPage = () => {
     });
 
     if (data) {
+      // ★ REQUIREMENT UPDATE (JWT): Better Auth has created the session
+      // cookie, so we can immediately request the signed JWT as well.
+      await primeJwtToken();
+
       toast.success("Sign up successful!");
       const callbackUrl = new URLSearchParams(window.location.search).get(
         "callbackUrl",

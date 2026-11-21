@@ -7,6 +7,8 @@ import Image from "next/image";
 import { ChevronDown, LayoutDashboard, LogOut, UserCog } from "lucide-react";
 import { Popover, toast } from "@heroui/react";
 import { authClient } from "@/lib/auth-client";
+// ★ REQUIREMENT UPDATE (JWT): clear the in-memory JWT on sign-out.
+import { clearJwtToken } from "@/lib/api/client";
 
 // ============================================================
 // Small helper that picks the badge color for each role
@@ -85,6 +87,7 @@ export default function AuthBtn({ onNavigate }: { onNavigate?: () => void }) {
       return;
     }
 
+    clearJwtToken(); // ★ JWT: do not keep using the old JWT after logout
     setIsOpen(false); // close the popover
     toast.success("Signed out successfully");
     onNavigate?.(); // close the mobile menu (no-op on desktop)

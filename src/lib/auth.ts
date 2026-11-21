@@ -1,5 +1,8 @@
 import { betterAuth } from "better-auth";
-import { bearer } from "better-auth/plugins";
+// ★ REQUIREMENT UPDATE (JWT): the old `bearer()` plugin only exposed the
+// MongoDB session token to the client. Assignment 9 requires a real JWT,
+// so we replace it with Better Auth's official `jwt()` plugin.
+import { jwt } from "better-auth/plugins";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 
@@ -74,14 +77,40 @@ export const auth = betterAuth({
   },
 
   // ============================================================
-  // BEARER PLUGIN — lets our Express server (mentor-lagbe-server)
-  // verify a login. The browser gets the session token from
-  // authClient.getSession() and sends it as
-  //   Authorization: Bearer <token>
-  // The server forwards that header to BetterAuth's get-session
-  // endpoint to check the user is really logged in.
+  // JWT PLUGIN (Assignment 9 requirement)
+  //
+  // After login the browser calls Better Auth's `/token` endpoint.
+  // That endpoint signs a JWT with this server's keys and returns it
+  // to the client. `apiFetch` then sends it to Express as:
+  //   Authorization: Bearer <jwt>
+  //
+  // The Express backend verifies the signature through our public
+  // JWKS endpoint (`/api/auth/jwks`) and then loads the fresh user
+  // from MongoDB. We keep normal Better Auth sessions ONLY for UI
+  // login state (useSession, signOut, etc.) — backend protection is
+  // now done with this JWT.
+  //
+  // `definePayload` keeps the token small. The backend still reads
+  // the real role from MongoDB, so a stale role inside the JWT can
+  // never grant access.
   // ============================================================
-  plugins: [bearer()],
+  plugins: [
+    jwt({
+      jwt: {
+        expirationTime: "1d",
+        definePayload: ({ user }) => ({
+          role: (user as { role?: string }).role ?? "student",
+        }),
+      },
+    }),
+  ],
+  session: {
+    cookieCache: {
+      enabled: true,
+      strategy: "jwt",
+      maxAge: 7 * 24 * 60 * 60,
+    },
+  },
 
   // ============================================================
   // Runs right BEFORE a new user is written to MongoDB.

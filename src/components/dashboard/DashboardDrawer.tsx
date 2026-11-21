@@ -7,6 +7,8 @@ import { GraduationCap, LogOut, Menu, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { toast } from "@heroui/react";
 import { authClient } from "@/lib/auth-client";
+// ★ REQUIREMENT UPDATE (JWT): clear the in-memory JWT on sign-out.
+import { clearJwtToken } from "@/lib/api/client";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
 // ============================================================
@@ -77,6 +79,7 @@ function SidebarContent({
       return;
     }
 
+    clearJwtToken(); // ★ JWT: do not keep using the old JWT after logout
     toast.success("Signed out successfully");
     onNavigate?.(); // close the mobile overlay if it is open
     router.push("/");

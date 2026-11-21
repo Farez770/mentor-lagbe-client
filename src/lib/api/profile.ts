@@ -24,7 +24,7 @@ export type ProfileResult = {
   };
 };
 
-// PATCH /api/profile — update MY profile. The login token is
+// PATCH /api/profile — update MY profile. ★ JWT: the signed JWT is
 // attached inside apiFetch, so the server knows who is calling.
 export function updateProfile(input: ProfileForm) {
   return apiFetch<ProfileResult>("/api/profile", {

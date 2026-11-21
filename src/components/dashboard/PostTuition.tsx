@@ -185,7 +185,7 @@ export default function PostTuition() {
       }
 
       // ---------- 3) save the tuition through OUR API ----------
-      // The session token is attached inside apiFetch, and the
+      // ★ JWT: the signed token is attached inside apiFetch, and the
       // server checks the role + free-plan limit.
       const result = await createTuition({
         title: form.title.trim(),

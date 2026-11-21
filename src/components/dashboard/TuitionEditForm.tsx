@@ -137,7 +137,7 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
         : tuition.image;
 
       // ---------- 3) save through OUR API ----------
-      // (session token is attached inside apiFetch;
+      // (★ JWT: the signed token is attached inside apiFetch;
       //  the server checks ownership + the same rules)
       const payload: CreateTuitionInput = {
         title: form.title.trim(),
