@@ -29,8 +29,13 @@ export async function apiFetch<T>(
   const { data: sessionData } = await authClient.getSession();
   const token = sessionData?.session?.token;
 
-  // 2) call the API with the token attached
+  // 2) call the API with the token attached.
+  //    cache: "no-store" = the answer is NEVER stored in the
+  //    browser's HTTP cache (or a CDN in front of the app), so
+  //    after every deployment the dashboards show the NEWEST
+  //    data the moment the page opens — no stale numbers.
   const res = await fetch(`${API_URL}${path}`, {
+    cache: "no-store",
     ...options,
     headers: {
       "Content-Type": "application/json",

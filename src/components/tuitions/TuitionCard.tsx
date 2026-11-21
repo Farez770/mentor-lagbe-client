@@ -104,8 +104,8 @@ export default function TuitionCard({ tuition }: { tuition: Tuition }) {
               </span>
               <span className="text-sm text-slate-600"> /month</span>
             </p>
-            {/* TODO (for you, later): build the details page
-                /tuitions/[id] — until then this link shows a 404 */}
+            {/* View Details link — goes to the tuition page
+                /tuitions/[id] (built and working) */}
             <Link
               href={`/tuitions/${tuition.id}`}
               className="flex cursor-pointer items-center gap-1 text-sm font-semibold text-slate-700 transition-colors hover:text-emerald-600"

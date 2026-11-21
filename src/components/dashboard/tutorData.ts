@@ -30,7 +30,7 @@ export const demoTutor = {
 // The first three routes are required by the project spec:
 //   1. /dashboard/tutor/post-tuition  (Post a Tuition Page) ✅
 //   2. /dashboard/tutor/my-tuitions   (My Created Tuitions ✅)
-//   3. /dashboard/tutor/applicants    (Manage Applicants — TODO)
+//   3. /dashboard/tutor/applicants    (Manage Applicants — works now ✅)
 // ============================================================
 export const tutorSections = [
   { name: "Overview", href: "/dashboard/tutor", icon: LayoutDashboard }, // works now ✅
@@ -46,6 +46,6 @@ export const tutorSections = [
     icon: Users,
   }, // works now ✅ (list + accept/reject)
   { name: "Update Profile", href: "/dashboard/profile", icon: UserCog }, // works now ✅ (any role)
-  { name: "Upgrade to Pro", href: "/pricing", icon: Sparkles }, // TODO later: create the pricing page
+  { name: "Upgrade to Pro", href: "/pricing", icon: Sparkles }, // works now ✅ (pricing page + Stripe Checkout)
   { name: "Back to Home", href: "/", icon: Home }, // works now ✅
 ];

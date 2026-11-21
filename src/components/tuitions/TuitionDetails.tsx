@@ -411,7 +411,9 @@ export default function TuitionDetails({ id }: { id: string }) {
           >
             {tuition.mode}
           </span>
-          {/* Approval status badge (admin approves in Phase 5) */}
+          {/* Approval status badge (the admin approval flow is
+              live — pending posts stay hidden from Browse until
+              the admin approves them in /dashboard/admin/tuitions) */}
           <span
             className={`absolute right-4 top-4 rounded-full px-3.5 py-1.5 text-xs font-bold text-white ${statusClass}`}
           >

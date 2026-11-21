@@ -5,6 +5,7 @@
 // receive functions as props.
 import { BookOpen, BadgeCheck, Users, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
+import Link from "next/link"; // the "Upgrade to Pro" button links to /pricing
 import StatCard from "@/components/dashboard/StatCard";
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
 // The sidebar sections + demo tutor are shared with the other
@@ -235,15 +236,17 @@ export default function TutorOverview() {
                 // Only the Plan card gets the Upgrade button
                 action={
                   stat.label === "Current Plan" && plan === "Free" ? (
-                    // TODO (for you, later): wire this button to the
-                    // Pro payment flow (payments collection) later.
-
-                    <button
-                      type="button"
-                      className="w-full cursor-pointer rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-amber-600"
+                    // WIRED (2026-11-21): this button used to be
+                    // dead (no onClick). The Pro payment flow
+                    // lives on /pricing (email box + Stripe
+                    // Checkout), so it simply links there — the
+                    // same target as the sidebar's "Upgrade to Pro".
+                    <Link
+                      href="/pricing"
+                      className="block w-full rounded-lg bg-amber-500 px-4 py-2 text-center text-xs font-bold text-white transition-colors hover:bg-amber-600"
                     >
                       ⭐ Upgrade to Pro
-                    </button>
+                    </Link>
                   ) : undefined
                 }
               />

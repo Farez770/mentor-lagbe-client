@@ -21,7 +21,7 @@ export const demoStudent = {
 //   2. /dashboard/student/my-applications          ✅
 //   3. /dashboard/student/bookmarks                ✅ NEW (2026-11-21)
 //   4. /dashboard/profile (Update Profile)         ✅
-// TODO (later): pricing page
+// (the pricing page exists too — /pricing)
 // ============================================================
 export const studentSections = [
   { name: "Overview", href: "/dashboard/student", icon: LayoutDashboard }, // works now ✅
