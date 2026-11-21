@@ -11,6 +11,7 @@ import {
   CalendarDays,
   Loader2,
   Mail,
+  Plus,
   Send,
   User,
 } from "lucide-react";
@@ -109,9 +110,7 @@ export default function MyApplications() {
     try {
       const result = await cancelApplication(app.id);
       // drop the cancelled application from the list
-      setApplications((list) =>
-        (list ?? []).filter((x) => x.id !== app.id),
-      );
+      setApplications((list) => (list ?? []).filter((x) => x.id !== app.id));
       toast.success(result.message || "Application cancelled");
     } catch (err) {
       toast.warning(
@@ -140,34 +139,52 @@ export default function MyApplications() {
         sections={studentSections}
         // Fallback user while the session loads — the drawer
         // swaps in the REAL logged-in student automatically.
-        user={{ name: demoStudent.name, role: "Student", plan: demoStudent.plan }}
+        user={{
+          name: demoStudent.name,
+          role: "Student",
+          plan: demoStudent.plan,
+        }}
       >
         <div className="mx-auto mt-16 max-w-5xl px-4">
           {/* ---------- Page heading ---------- */}
-          <div className="mb-5">
-            <p className="text-xs font-bold tracking-widest text-emerald-700">
-              MY APPLICATIONS
-            </p>
-            <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-[#173D32] sm:text-3xl">
-              Tuitions you applied for
-            </h1>
-            <p className="mt-1.5 text-sm text-gray-600">
-              Every tuition you&apos;ve applied to — check the tutor&apos;s
-              decision and cancel anything still pending.
-            </p>
-            {applications !== null && !loadError && (
-              <p className="mt-2 inline-block rounded-full bg-white px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
-                {applications.length}{" "}
-                {applications.length === 1 ? "application" : "applications"}
+          <div className="mb-5 flex justify-between">
+            <div>
+              <p className="text-xs font-bold tracking-widest text-emerald-700">
+                MY APPLICATIONS
               </p>
-            )}
-            {/* PRIORITY BOOKING — what the Pro plan bought you */}
-            {isPro && (
-              <p className="mt-2 inline-block rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-200">
-                ⭐ Pro plan: your applications appear first in tutors&apos;
-                applicant lists
+              <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-[#173D32] sm:text-3xl">
+                Tuitions you applied for
+              </h1>
+              <p className="mt-1.5 text-sm text-gray-600">
+                Every tuition you&apos;ve applied to — check the tutor&apos;s
+                decision and cancel anything still pending.
               </p>
-            )}
+
+              {applications !== null && !loadError && (
+                <p className="mt-2 inline-block rounded-full bg-white px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
+                  {applications.length}{" "}
+                  {applications.length === 1 ? "application" : "applications"}
+                </p>
+              )}
+              {/* PRIORITY BOOKING — what the Pro plan bought you */}
+              {isPro && (
+                <p className="mt-2 inline-block rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-200">
+                  ⭐ Pro plan: your applications appear first in tutors&apos;
+                  applicant lists
+                </p>
+              )}
+            </div>
+            <div className="flex justify-center items-center">
+              <Link
+                href="/tuitions"
+                className="text-center px-5 py-3 rounded font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
+              >
+                <span className="flex gap-2">
+                  <Plus />
+                  Add More Tuitions
+                </span>
+              </Link>
+            </div>
           </div>
 
           {/* ==================================================
@@ -180,8 +197,8 @@ export default function MyApplications() {
                 Could not load your applications
               </h2>
               <p className="mx-auto mt-1.5 max-w-md text-sm text-slate-600">
-                Something went wrong while talking to the server. Check that
-                the API server is running, then try again.
+                Something went wrong while talking to the server. Check that the
+                API server is running, then try again.
               </p>
               <button
                 type="button"
@@ -246,7 +263,8 @@ export default function MyApplications() {
                     </div>
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-bold ${
-                        statusStyles[app.status] ?? "bg-slate-100 text-slate-600"
+                        statusStyles[app.status] ??
+                        "bg-slate-100 text-slate-600"
                       }`}
                     >
                       {capitalize(app.status)}

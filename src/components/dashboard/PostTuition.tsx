@@ -346,6 +346,9 @@ export default function PostTuition() {
                             Days per Week dropdown worked but these two showed
                             "Select an item". Every item needs an id. */}
                         <ListBox>
+                          <ListBox.Item key="Class 1-5" id="Class 1-5">
+                            Class 1-5
+                          </ListBox.Item>
                           <ListBox.Item key="Class 6-7" id="Class 6-7">
                             Class 6-7
                           </ListBox.Item>

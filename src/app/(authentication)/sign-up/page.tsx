@@ -118,10 +118,18 @@ const SignUpPage = () => {
 
     if (data) {
       toast.success("Sign up successful!");
-      // Go to the home page after a successful sign up.
-      // (Use router.push in event handlers — redirect() only
-      // works during rendering, not inside onSubmit)
-      router.push("/");
+      const callbackUrl = new URLSearchParams(window.location.search).get(
+        "callbackUrl",
+      );
+      const isTuitionApplyReturn =
+        callbackUrl !== null &&
+        /^\/tuitions\/[^/?#\\]+\?apply=1$/.test(callbackUrl) &&
+        !callbackUrl.includes("%") &&
+        !callbackUrl.startsWith("//");
+
+      router.push(
+        isTuitionApplyReturn && selectedRole === "student" ? callbackUrl : "/",
+      );
     }
 
     if (error) {

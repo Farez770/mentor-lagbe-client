@@ -296,7 +296,7 @@ export default function PricingPlans() {
   );
 
   return (
-    <section className="py-16 md:py-20">
+    <section className="py-8 md:py-12">
       <div className="mx-auto max-w-7xl px-4">
         <SectionHeading
           tagline="Pricing"
@@ -326,8 +326,7 @@ export default function PricingPlans() {
             />
             <p className="mt-2 text-xs text-slate-500">
               Leave it empty to use your account email. After you pick a plan,
-              Stripe&apos;s secure page opens for your{" "}
-              <b>card information</b>.
+              Stripe&apos;s secure page opens for your <b>card information</b>.
             </p>
           </div>
         </FadeIn>
@@ -356,8 +355,8 @@ export default function PricingPlans() {
               Your card information stays with Stripe
             </h3>
             <p className="mt-2">
-              When you click a Subscribe button we open Stripe&apos;s
-              hosted checkout page. You enter your{" "}
+              When you click a Subscribe button we open Stripe&apos;s hosted
+              checkout page. You enter your{" "}
               <b>card number, expiry date and CVC</b> there — the fields are
               encrypted and PCI-compliant, and MentorLagbe only receives a
               payment confirmation, never your card details.
@@ -372,10 +371,7 @@ export default function PricingPlans() {
                 4242 4242 4242 4242
               </code>
               , any future expiry, any CVC. Problems?{" "}
-              <Link
-                href="/"
-                className="underline hover:text-emerald-600"
-              >
+              <Link href="/" className="underline hover:text-emerald-600">
                 Contact support
               </Link>
               .

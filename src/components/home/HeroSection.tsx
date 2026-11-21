@@ -93,7 +93,7 @@ export default function HeroSection() {
             width={480}
             height={480}
             loading="eager"
-            className="w-full h-auto  sm:h-96 lg:h-[480px] object-cover rounded-3xl shadow-xl text-black"
+            className="w-full h-auto sm:h-96 lg:h-[480px] object-cover rounded-3xl shadow-xl text-black"
           />
 
           {/* Floating mini cards on top of the image (they gently bob).

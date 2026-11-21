@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -54,6 +55,7 @@ function InfoRow({
 }
 
 export default function TuitionDetails({ id }: { id: string }) {
+  const router = useRouter();
   const [tuition, setTuition] = useState<PostedTuition | null>(null);
   const [state, setState] = useState<LoadState>("loading");
 
@@ -114,6 +116,62 @@ export default function TuitionDetails({ id }: { id: string }) {
   // update one field of the application form
   const updateApply = (key: keyof typeof applyForm, value: string) =>
     setApplyForm((f) => ({ ...f, [key]: value }));
+
+  // After sign-in/sign-up, return to this listing and reopen the existing modal.
+  useEffect(() => {
+    if (state !== "ready" || isPending) return;
+
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("apply") !== "1") return;
+
+    // Guests who open the return URL directly should sign in first.
+    if (!session?.user) {
+      const destination = `/tuitions/${encodeURIComponent(id)}?apply=1`;
+      router.replace(`/sign-in?callbackUrl=${encodeURIComponent(destination)}`);
+      return;
+    }
+
+    // A tutor or admin cannot apply. Remove the return flag.
+    if (role !== "student") {
+      url.searchParams.delete("apply");
+      window.history.replaceState(
+        window.history.state,
+        "",
+        url.pathname + url.search + url.hash,
+      );
+      return;
+    }
+
+    const user = session.user as {
+      name?: string;
+      email?: string;
+      phone?: string;
+    };
+
+    // Schedule updates outside the synchronous effect body to avoid
+    // react-hooks/set-state-in-effect. Cleanup also handles Strict Mode.
+    const timeoutId = window.setTimeout(() => {
+      setApplyForm((previous) => ({
+        ...previous,
+        name: previous.name || user.name || "",
+        email: previous.email || user.email || "",
+        phone: previous.phone || user.phone || "",
+      }));
+      setApplyOpen(true);
+
+      // Consume the flag only after scheduling succeeded, so a refresh
+      // or React Strict Mode cleanup does not lose the intended modal.
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.delete("apply");
+      window.history.replaceState(
+        window.history.state,
+        "",
+        currentUrl.pathname + currentUrl.search + currentUrl.hash,
+      );
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [state, isPending, session, role, id, router]);
 
   // validate -> POST /api/applications -> toast + close
   const onApplySubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
@@ -380,11 +438,7 @@ export default function TuitionDetails({ id }: { id: string }) {
                 label="Schedule"
                 value={`${tuition.days} days / week`}
               />
-              <InfoRow
-                icon={BadgeCheck}
-                label="Status"
-                value={statusLabel}
-              />
+              <InfoRow icon={BadgeCheck} label="Status" value={statusLabel} />
             </ul>
 
             {/* NOTICE for tutors / admins — requirement: the
@@ -414,7 +468,10 @@ export default function TuitionDetails({ id }: { id: string }) {
                 if (isPending) return; // session still loading — wait
                 if (isBlocked) return; // safety — already disabled
                 if (!session) {
-                  toast.warning("Please sign in first to apply");
+                  const destination = `/tuitions/${encodeURIComponent(id)}?apply=1`;
+                  router.push(
+                    `/sign-in?callbackUrl=${encodeURIComponent(destination)}`,
+                  );
                   return;
                 }
                 // Prefill name / email (and phone if the profile has

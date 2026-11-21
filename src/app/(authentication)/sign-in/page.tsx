@@ -14,7 +14,13 @@ import {
   TextField,
   toast,
 } from "@heroui/react";
-import { Eye, EyeClosed, GraduationCap, Users, ShieldCheck } from "lucide-react";
+import {
+  Eye,
+  EyeClosed,
+  GraduationCap,
+  Users,
+  ShieldCheck,
+} from "lucide-react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -68,8 +74,23 @@ const SignInPage = () => {
       return;
     }
 
-    // ---- Success: welcome toast + ROLE-BASED redirect -----
+    // ---- Success: return to the requested tuition for Student accounts -----
     toast.success(`Welcome back, ${data.user.name}!`);
+
+    const callbackUrl = new URLSearchParams(window.location.search).get(
+      "callbackUrl",
+    );
+    const isTuitionApplyReturn =
+      callbackUrl !== null &&
+      /^\/tuitions\/[^/?#\\]+\?apply=1$/.test(callbackUrl) &&
+      !callbackUrl.includes("%") &&
+      !callbackUrl.startsWith("//");
+
+    if (isTuitionApplyReturn && data.user.role === "student") {
+      router.replace(callbackUrl);
+      router.refresh();
+      return;
+    }
 
     if (data.user.role === "tutor") {
       // Tutors land on their dashboard
@@ -289,6 +310,21 @@ const SignInPage = () => {
               Don&apos;t have an account?{" "}
               <Link
                 href="/sign-up"
+                onClick={(event) => {
+                  const callbackUrl = new URLSearchParams(
+                    window.location.search,
+                  ).get("callbackUrl");
+                  if (
+                    callbackUrl &&
+                    /^\/tuitions\/[^/?#\\]+\?apply=1$/.test(callbackUrl) &&
+                    !callbackUrl.includes("%")
+                  ) {
+                    event.preventDefault();
+                    router.push(
+                      `/sign-up?callbackUrl=${encodeURIComponent(callbackUrl)}`,
+                    );
+                  }
+                }}
                 className="font-semibold text-emerald-700 text-sm md:text-lg transition-colors hover:text-emerald-900 hover:underline hover:underline-offset-2"
               >
                 Sign up

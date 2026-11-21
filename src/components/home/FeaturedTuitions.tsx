@@ -16,13 +16,10 @@ import { getTuitions } from "@/lib/api/tuitions";
 //   Title, Subject, Class Level, Mode, Monthly Fee,
 //   Tutor Name and a "View Details" button.
 //
-// Data comes from GET /api/tuitions (newest first), so
-// slice(0, 6) keeps exactly the 6 latest.
-//
-// TODO (Phase 5 — admin approval): once the admin can approve
-// listings, the API will return ONLY approved ones — until
-// then every ACTIVE post shows (same rule as the Browse page),
-// so a tutor can immediately see their own new tuition here.
+// Data comes from GET /api/tuitions (newest first), which
+// returns ONLY approvalStatus === "approved" AND isActive ===
+// true posts — so slice(0, 6) is exactly the 6 LATEST Approved
+// & Active listings, as the requirement demands.
 // ============================================================
 
 export default function FeaturedTuitions() {
@@ -38,11 +35,16 @@ export default function FeaturedTuitions() {
       .then((data) => {
         if (!alive) return;
         // The API shape (tutorName, approvalStatus) is mapped
-        // to the card's shape (tutor, status), then we keep
-        // only the 6 newest listings
+        // to the card's shape (tutor, status). Safety net: only
+        // Approved & Active posts may appear (the API already
+        // filters, this guards the rule a second time), then we
+        // keep only the 6 newest of them — the "6 latest
+        // Approved & Active listings" from the requirement.
         setTuitions(
           data.tuitions
-            .slice(0, 6) // requirement: 6 latest listings
+            .filter((item) => item.approvalStatus === "approved")
+            .filter((item) => item.isActive)
+            .slice(0, 6)
             .map((item) => ({
               id: item.id,
               title: item.title,

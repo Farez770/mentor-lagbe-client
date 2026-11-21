@@ -89,7 +89,10 @@ export default function BrowseTuitions() {
     "all",
     ...new Set(tuitions.map((tuition) => tuition.classLevel)),
   ];
-  const modeOptions = ["all", ...new Set(tuitions.map((tuition) => tuition.mode))];
+  const modeOptions = [
+    "all",
+    ...new Set(tuitions.map((tuition) => tuition.mode)),
+  ];
 
   // Lowercased search text once, so the comparisons below are easy
   const keyword = search.trim().toLowerCase();
@@ -97,9 +100,11 @@ export default function BrowseTuitions() {
   // ---- The filtering (this is the heart of the page) ----
   // Keep a tuition only when it passes EVERY check below.
   const filteredTuitions = tuitions.filter((tuition) => {
-    // 1) Only live listings. TODO (Phase 5): the API will
-    //    return ONLY approved tuitions once the admin approval
-    //    flow exists — until then every active post shows here.
+    // 1) ONLY approved + active listings are public. The API
+    //    (GET /api/tuitions) already returns just those — this
+    //    second check is a safety net so a pending/rejected or
+    //    closed post can never leak onto this page.
+    if (tuition.status !== "approved") return false;
     if (!tuition.isActive) return false;
 
     // 2) Search box: the keyword must appear in the title,
@@ -146,7 +151,7 @@ export default function BrowseTuitions() {
     "w-full cursor-pointer appearance-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 pr-9 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500";
 
   return (
-    <section className="bg-slate-50 py-12 md:py-16">
+    <section className="bg-slate-50 py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4">
         {/* Same heading style as every other section on the site */}
         <SectionHeading
@@ -324,11 +329,7 @@ export default function BrowseTuitions() {
           /* ---- The grid: 1 column on mobile, 2 on tablet, 3 on desktop ---- */
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filteredTuitions.map((tuition, index) => (
-              <FadeIn
-                key={tuition.id}
-                delay={index * 0.08}
-                className="h-full"
-              >
+              <FadeIn key={tuition.id} delay={index * 0.08} className="h-full">
                 <TuitionCard tuition={tuition} />
               </FadeIn>
             ))}
