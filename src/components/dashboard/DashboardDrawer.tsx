@@ -7,6 +7,7 @@ import { GraduationCap, LogOut, Menu, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { toast } from "@heroui/react";
 import { authClient } from "@/lib/auth-client";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 // ============================================================
 // One menu item inside the sidebar, e.g.
@@ -196,9 +197,15 @@ function SidebarContent({
       </div>
 
       {/* ======================================================
-          [4] LOGOUT / SIGN OUT — always at the bottom
+          [4] THEME + LOGOUT — always at the bottom
           ====================================================== */}
       <div className="border-t border-slate-100 p-4">
+        {/* Dark/light switcher lives here on desktop so every
+            dashboard route has it inside the fixed sidebar. */}
+        <div className="mb-3 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2">
+          <span className="text-xs font-bold text-slate-600">Appearance</span>
+          <ThemeToggle compact />
+        </div>
         <button
           type="button"
           onClick={handleSignOut}
@@ -324,19 +331,22 @@ export default function DashboardDrawer({
             </p>
           </div>
 
-          {/* Small avatar so the user still sees who they are */}
-          {shownUser.image ? (
-            // eslint-disable-next-line @next/next/no-img-element -- profile photos can come from any domain
-            <img
-              src={shownUser.image}
-              alt=""
-              className="h-8 w-8 shrink-0 rounded-full object-cover"
-            />
-          ) : (
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-extrabold text-emerald-700">
-              {shownUser.name.charAt(0)}
-            </span>
-          )}
+          {/* Theme switcher + small avatar so the user still sees who they are */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle compact />
+            {shownUser.image ? (
+              // eslint-disable-next-line @next/next/no-img-element -- profile photos can come from any domain
+              <img
+                src={shownUser.image}
+                alt=""
+                className="h-8 w-8 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-extrabold text-emerald-700">
+                {shownUser.name.charAt(0)}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* ---- PAGE CONTENT — the only scrollable area ----

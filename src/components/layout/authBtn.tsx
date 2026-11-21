@@ -13,12 +13,13 @@ import { authClient } from "@/lib/auth-client";
 // (student = green, tutor = amber, admin = rose)
 // ============================================================
 function RoleBadge({ role }: { role: string }) {
-  let badgeColor = "bg-emerald-100 text-emerald-700"; // default = student
+  let badgeColor =
+    "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"; // default = student
   if (role === "tutor") {
-    badgeColor = "bg-amber-100 text-amber-700";
+    badgeColor = "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300";
   }
   if (role === "admin") {
-    badgeColor = "bg-rose-100 text-rose-700";
+    badgeColor = "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300";
   }
 
   return (
@@ -101,7 +102,7 @@ export default function AuthBtn({ onNavigate }: { onNavigate?: () => void }) {
 
   // Shared style for the menu items inside the popover
   const menuItemClass =
-    "flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700";
+    "flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950 dark:hover:text-emerald-300";
 
   return (
     // Popover = the whole dropdown: a trigger button + a popup.
@@ -111,7 +112,7 @@ export default function AuthBtn({ onNavigate }: { onNavigate?: () => void }) {
           TRIGGER — what the user sees in the navbar:
           avatar + name + role badge + arrow
           ======================================================== */}
-      <Popover.Trigger className="flex cursor-pointer items-center gap-2 rounded-full py-1 pl-1 pr-2.5 transition-colors hover:bg-emerald-50">
+      <Popover.Trigger className="flex cursor-pointer items-center gap-2 rounded-full py-1 pl-1 pr-2.5 transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-950">
         {/* Profile image, or the first letter if there is no photo */}
         {user.image ? (
           <Image
@@ -154,11 +155,11 @@ export default function AuthBtn({ onNavigate }: { onNavigate?: () => void }) {
           ======================================================== */}
       <Popover.Content
         placement="bottom end"
-        className="z-50 w-72 overflow-hidden"
+        className="z-50 w-72 overflow-hidden bg-white dark:bg-slate-900"
       >
         {/* p-0 removes the dialog's default padding — we control
             the spacing ourselves so sections can touch the edges */}
-        <Popover.Dialog className="p-0">
+        <Popover.Dialog className="p-0 bg-white dark:bg-slate-900 dark:text-slate-100">
           {/* --- Header: which account is logged in --- */}
           <div className="flex items-center gap-3 border-b border-slate-200 bg-emerald-50 p-4">
             {user.image ? (
@@ -209,7 +210,7 @@ export default function AuthBtn({ onNavigate }: { onNavigate?: () => void }) {
             <button
               type="button"
               onClick={handleSignOut}
-              className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-50"
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-950"
             >
               <LogOut className="h-4 w-4" />
               Sign Out

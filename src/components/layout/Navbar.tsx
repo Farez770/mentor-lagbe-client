@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { GraduationCap, Menu, X } from "lucide-react";
 import AuthBtn from "@/components/layout/authBtn";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 import { authClient } from "@/lib/auth-client";
 
 // Links shown to everyone in the navbar
@@ -93,8 +94,9 @@ export default function Navbar() {
           ))}
         </ul>
 
-        {/* Desktop right side: logged-in view OR guest buttons */}
+        {/* Desktop right side: theme switcher + logged-in view OR guest buttons */}
         <div className="hidden lg:flex items-center gap-3">
+          <ThemeToggle />
           {isPending ? null : isLoggedIn ? (
             // Logged in -> avatar, name, role badge, Dashboard,
             // Update Profile and Sign Out (all real, from the session)
@@ -118,14 +120,17 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile menu button */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="lg:hidden p-2 text-slate-700"
-          aria-label="Toggle menu"
-        >
-          {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* Mobile: theme switcher sits next to the menu button */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <ThemeToggle compact />
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-2 text-slate-700"
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile menu — slides down slowly over the page content.
