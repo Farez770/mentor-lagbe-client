@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Modal, toast } from "@heroui/react";
-import { FilePlus, Loader2, Pencil, Power, Trash2 } from "lucide-react";
+import { FilePlus, Pencil, Power, Trash2 } from "lucide-react";
+import { LoadingSpinner } from "@/components/shared/Loading"; // shared loading UI
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
 import { demoTutor, tutorSections } from "@/components/dashboard/tutorData";
 import {
@@ -193,11 +194,8 @@ export default function MyTuitions() {
               </button>
             </div>
           ) : tuitions === null ? (
-            /* ---------- 2) LOADING ---------- */
-            <div className="flex flex-col items-center gap-3 py-16 text-slate-500">
-              <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-              <p className="text-sm font-medium">Loading your tuitions…</p>
-            </div>
+            /* ---------- 2) LOADING (shared loader) ---------- */
+            <LoadingSpinner label="Loading your tuitions…" />
           ) : tuitions.length === 0 ? (
             /* ---------- 3) EMPTY ---------- */
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-14 text-center">

@@ -9,12 +9,12 @@ import { Modal, toast } from "@heroui/react";
 import {
   Ban,
   CalendarDays,
-  Loader2,
   Mail,
   Plus,
   Send,
   User,
 } from "lucide-react";
+import { LoadingSpinner } from "@/components/shared/Loading"; // shared loader
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
 import {
   demoStudent,
@@ -218,11 +218,8 @@ export default function MyApplications() {
               </button>
             </div>
           ) : applications === null ? (
-            /* ---------- 2) LOADING ---------- */
-            <div className="flex flex-col items-center gap-3 py-16 text-slate-500">
-              <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-              <p className="text-sm font-medium">Loading your applications…</p>
-            </div>
+            /* ---------- 2) LOADING (shared loader) ---------- */
+            <LoadingSpinner label="Loading your applications…" />
           ) : applications.length === 0 ? (
             /* ---------- 3) EMPTY ---------- */
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-14 text-center">

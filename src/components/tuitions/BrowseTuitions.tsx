@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, ChevronDown, X, Loader2 } from "lucide-react";
+import { Search, ChevronDown, X } from "lucide-react";
+import { LoadingSpinner } from "@/components/shared/Loading"; // shared loading UI
 import SectionHeading from "@/components/shared/SectionHeading";
 import FadeIn from "@/components/shared/FadeIn";
 import TuitionCard, { type Tuition } from "@/components/tuitions/TuitionCard";
@@ -290,11 +291,8 @@ export default function BrowseTuitions() {
             "no match for your filters" → the grid
             ==================================================== */}
         {isLoading ? (
-          /* ---- Still fetching from the API ---- */
-          <div className="flex flex-col items-center gap-3 py-20 text-slate-500">
-            <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-            <p className="text-sm font-medium">Loading tuitions…</p>
-          </div>
+          /* ---- Still fetching from the API (shared loader) ---- */
+          <LoadingSpinner label="Loading tuitions…" />
         ) : tuitions.length === 0 ? (
           /* ---- The API has no active tuitions at all ---- */
           <FadeIn className="rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { MapPin, CalendarDays, ArrowRight, Loader2 } from "lucide-react";
+import { MapPin, CalendarDays, ArrowRight } from "lucide-react";
+import { LoadingSpinner } from "@/components/shared/Loading"; // shared loading UI
 import SectionHeading from "@/components/shared/SectionHeading";
 import FadeIn from "@/components/shared/FadeIn";
 import type { Tuition } from "@/components/tuitions/TuitionCard";
@@ -86,11 +87,8 @@ export default function FeaturedTuitions() {
         />
 
         {isLoading ? (
-          /* ---- Still fetching from the API ---- */
-          <div className="flex flex-col items-center gap-3 py-16 text-slate-500">
-            <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-            <p className="text-sm font-medium">Loading tuitions…</p>
-          </div>
+          /* ---- Still fetching from the API (shared loader) ---- */
+          <LoadingSpinner label="Loading tuitions…" />
         ) : tuitions.length === 0 ? (
           /* ---- No active tuitions in the database at all ---- */
           <FadeIn className="rounded-2xl border border-dashed border-slate-300 py-16 text-center">

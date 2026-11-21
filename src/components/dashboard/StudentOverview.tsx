@@ -4,6 +4,7 @@
 // COMPONENTS (functions) to DashboardDrawer, and only client
 // components may receive functions as props.
 import { Send, BadgeCheck, Clock, Sparkles } from "lucide-react";
+import { StatCardsSkeleton } from "@/components/shared/Loading"; // skeleton cards while stats load
 import { useEffect, useState } from "react";
 import StatCard from "@/components/dashboard/StatCard";
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
@@ -207,21 +208,28 @@ export default function StudentOverview() {
 
           {/* ====================================================
               STATS GRID — the 4 required cards.
-              1 column on mobile, 2 on tablet, 4 on desktop.
+              While the stats API call is in flight, show 4
+              pulsing placeholder cards instead of "…" text.
               ==================================================== */}
-          <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-            {stats.map((stat) => (
-              <StatCard
-                key={stat.id}
-                icon={stat.icon}
-                label={stat.label}
-                value={stat.value}
-                sub={stat.sub}
-                dot={stat.dot}
-                accent={stat.accent}
-              />
-            ))}
-          </div>
+          {statsData === null ? (
+            <div className="mt-6">
+              <StatCardsSkeleton />
+            </div>
+          ) : (
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              {stats.map((stat) => (
+                <StatCard
+                  key={stat.id}
+                  icon={stat.icon}
+                  label={stat.label}
+                  value={stat.value}
+                  sub={stat.sub}
+                  dot={stat.dot}
+                  accent={stat.accent}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </DashboardDrawer>
     </section>

@@ -4,7 +4,8 @@
 // COMPONENTS (functions) to DashboardDrawer, and only client
 // components may receive functions as props.
 import { useEffect, useState } from "react"; // hooks: load the list once
-import { CreditCard, Loader2 } from "lucide-react"; // spinner + icons
+import { CreditCard } from "lucide-react";
+import { LoadingSpinner } from "@/components/shared/Loading"; // shared loading UI
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer"; // dashboard shell (sidebar + content area)
 import { adminSections, demoAdmin } from "@/components/dashboard/adminData"; // shared admin sidebar
 import {
@@ -155,12 +156,7 @@ export default function AdminTransactions() {
             </div>
           ) : txs === null ? (
             /* ---------- 2) LOADING — request still running ---------- */
-            <div className="flex flex-col items-center gap-3 py-16 text-slate-500">
-              {/* spinning loader */}
-              <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-              {/* loader caption */}
-              <p className="text-sm font-medium">Loading transactions…</p>
-            </div>
+            <LoadingSpinner label="Loading transactions…" />
           ) : txs.length === 0 ? (
             /* ---------- 3) EMPTY — nobody has paid yet ---------- */
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-14 text-center">

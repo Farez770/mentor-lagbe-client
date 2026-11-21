@@ -6,6 +6,7 @@
 import { BookOpen, BadgeCheck, Users, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link"; // the "Upgrade to Pro" button links to /pricing
+import { StatCardsSkeleton } from "@/components/shared/Loading"; // skeleton cards while stats load
 import StatCard from "@/components/dashboard/StatCard";
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
 // The sidebar sections + demo tutor are shared with the other
@@ -221,37 +222,44 @@ export default function TutorOverview() {
 
           {/* ====================================================
               STATS GRID — the 4 required cards.
-              1 column on mobile, 2 on tablet, 4 on desktop.
+              While GET /api/tuitions/stats is in flight, show 4
+              pulsing placeholder cards instead of "…" text.
               ==================================================== */}
-          <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-            {stats.map((stat) => (
-              <StatCard
-                key={stat.id}
-                icon={stat.icon}
-                label={stat.label}
-                value={stat.value}
-                sub={stat.sub}
-                dot={stat.dot}
-                accent={stat.accent}
-                // Only the Plan card gets the Upgrade button
-                action={
-                  stat.label === "Current Plan" && plan === "Free" ? (
-                    // WIRED (2026-11-21): this button used to be
-                    // dead (no onClick). The Pro payment flow
-                    // lives on /pricing (email box + Stripe
-                    // Checkout), so it simply links there — the
-                    // same target as the sidebar's "Upgrade to Pro".
-                    <Link
-                      href="/pricing"
-                      className="block w-full rounded-lg bg-amber-500 px-4 py-2 text-center text-xs font-bold text-white transition-colors hover:bg-amber-600"
-                    >
-                      ⭐ Upgrade to Pro
-                    </Link>
-                  ) : undefined
-                }
-              />
-            ))}
-          </div>
+          {statsData === null ? (
+            <div className="mt-6">
+              <StatCardsSkeleton />
+            </div>
+          ) : (
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              {stats.map((stat) => (
+                <StatCard
+                  key={stat.id}
+                  icon={stat.icon}
+                  label={stat.label}
+                  value={stat.value}
+                  sub={stat.sub}
+                  dot={stat.dot}
+                  accent={stat.accent}
+                  // Only the Plan card gets the Upgrade button
+                  action={
+                    stat.label === "Current Plan" && plan === "Free" ? (
+                      // WIRED (2026-11-21): this button used to be
+                      // dead (no onClick). The Pro payment flow
+                      // lives on /pricing (email box + Stripe
+                      // Checkout), so it simply links there — the
+                      // same target as the sidebar's "Upgrade to Pro".
+                      <Link
+                        href="/pricing"
+                        className="block w-full rounded-lg bg-amber-500 px-4 py-2 text-center text-xs font-bold text-white transition-colors hover:bg-amber-600"
+                      >
+                        ⭐ Upgrade to Pro
+                      </Link>
+                    ) : undefined
+                  }
+                />
+              ))}
+            </div>
+          )}
         </div>
       </DashboardDrawer>
     </section>

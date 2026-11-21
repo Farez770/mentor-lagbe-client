@@ -10,11 +10,11 @@ import {
   BookmarkCheck,
   CalendarDays,
   GraduationCap,
-  Loader2,
   Lock,
   MapPin,
   Monitor,
 } from "lucide-react";
+import { LoadingSpinner } from "@/components/shared/Loading"; // shared loader
 import { Modal, toast } from "@heroui/react";
 import { authClient } from "@/lib/auth-client";
 import { getTuition, type PostedTuition } from "@/lib/api/tuitions";
@@ -297,10 +297,7 @@ export default function TuitionDetails({ id }: { id: string }) {
   if (state === "loading") {
     return (
       <section className="bg-slate-50 py-20">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 text-slate-500">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-          <p className="text-sm font-medium">Loading tuition details…</p>
-        </div>
+        <LoadingSpinner label="Loading tuition details…" />
       </section>
     );
   }

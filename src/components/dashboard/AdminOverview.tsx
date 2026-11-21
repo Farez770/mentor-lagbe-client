@@ -3,13 +3,8 @@
 // "use client" is needed because this page passes icon
 // COMPONENTS (functions) to DashboardDrawer, and only client
 // components may receive functions as props.
-import {
-  ClipboardList,
-  CreditCard,
-  GraduationCap,
-  Loader2,
-  Users,
-} from "lucide-react";
+import { ClipboardList, CreditCard, GraduationCap, Users } from "lucide-react";
+import { StatCardsSkeleton } from "@/components/shared/Loading"; // skeleton cards while stats load
 import { useEffect, useState } from "react";
 import StatCard from "@/components/dashboard/StatCard";
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
@@ -222,11 +217,15 @@ export default function AdminOverview() {
                 Try Again
               </button>
             </div>
+          ) : !statsData ? (
+            /* Skeleton cards while GET /api/admin/stats loads */
+            <div className="mt-6">
+              <StatCardsSkeleton />
+            </div>
           ) : (
             /* ====================================================
                 2) STATS GRID — the 4 required cards.
                 1 column on mobile, 2 on tablet, 4 on desktop.
-                Values show "…" until the API answers.
                 ==================================================== */
             <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
               {stats.map((stat) => (
@@ -240,14 +239,6 @@ export default function AdminOverview() {
                   accent={stat.accent}
                 />
               ))}
-            </div>
-          )}
-
-          {/* Tiny helper while the first load is running */}
-          {!statsData && !loadError && (
-            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-slate-500">
-              <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
-              <span>Loading platform stats…</span>
             </div>
           )}
         </div>
