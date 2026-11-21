@@ -135,13 +135,18 @@ export default function ManageApplicants() {
                   {applications.length}{" "}
                   {applications.length === 1 ? "application" : "applications"}
                 </p>
-                {/* PRIORITY BOOKING legend — explains why the
-                    list is ordered the way it is */}
+                {/* ★ REQUIREMENT UPDATE (2026-11-21): the "⭐ Pro
+                    students first" legend is DISABLED — the Pro
+                    benefit changed from priority booking to
+                    unlimited bookmarks (see lib/api/bookmarks.ts).
+                    Uncomment together with the sort in GET
+                    /api/applications/tutor if it ever returns.
                 {applications.length > 0 && (
                   <p className="inline-block rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-200">
                     ⭐ Pro students&apos; applications appear first
                   </p>
                 )}
+                */}
               </span>
             )}
           </div>
@@ -203,14 +208,21 @@ export default function ManageApplicants() {
                       <div>
                         <h2 className="font-bold text-[#173D32]">
                           {app.studentName}
-                          {/* PRIORITY BOOKING badge — Pro
-                              students get a golden marker so the
-                              tutor instantly sees who is first */}
+                          {/* ★ REQUIREMENT UPDATE (2026-11-21):
+                              the "⭐ Priority" badge is DISABLED —
+                              the Pro benefit changed from priority
+                              booking to unlimited bookmarks (see
+                              lib/api/bookmarks.ts), and the server
+                              no longer returns studentPlan.
+                              Uncomment together with the sort in
+                              GET /api/applications/tutor if it
+                              ever comes back.
                           {app.studentPlan === "pro" && (
                             <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 align-middle text-[11px] font-bold text-amber-700">
                               ⭐ Priority
                             </span>
                           )}
+                          */}
                         </h2>
                         <p className="text-xs text-gray-500">
                           Applied on {appliedOn(app.createdAt)}

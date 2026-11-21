@@ -60,7 +60,7 @@ export type TutorStats = {
   total: number; // every tuition this tutor posted
   approved: number; // approved + live listings
   pending: number; // waiting for admin approval
-  applicants: number; // students who applied (0 until built)
+  applicants: number; // REAL application count (fixed 2026-11-21)
 };
 
 // GET /api/tuitions/stats — real counts for the overview cards

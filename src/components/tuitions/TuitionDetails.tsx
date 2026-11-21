@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   BadgeCheck,
+  Bookmark,
+  BookmarkCheck,
   CalendarDays,
   GraduationCap,
   Loader2,
@@ -17,6 +19,11 @@ import { Modal, toast } from "@heroui/react";
 import { authClient } from "@/lib/auth-client";
 import { getTuition, type PostedTuition } from "@/lib/api/tuitions";
 import { applyForTuition } from "@/lib/api/applications";
+import {
+  checkBookmark,
+  addBookmark,
+  removeBookmark,
+} from "@/lib/api/bookmarks";
 
 // ============================================================
 // TUITION VIEW DETAILS (/tuitions/[id])
@@ -116,6 +123,61 @@ export default function TuitionDetails({ id }: { id: string }) {
   // update one field of the application form
   const updateApply = (key: keyof typeof applyForm, value: string) =>
     setApplyForm((f) => ({ ...f, [key]: value }));
+
+  // ============================================================
+  // BOOKMARK TOGGLE — NEW requirement (2026-11-21):
+  //   "Free Students can bookmark 5 tuitions;
+  //    Pro Students can bookmark unlimited tuitions."
+  // The SERVER owns the limit: when a free student hits 5, the
+  // API answers 403 and we show its message in a toast.
+  // ============================================================
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkBusy, setBookmarkBusy] = useState(false);
+
+  // Ask the API whether THIS tuition is already bookmarked by
+  // me (only signed-in students — everyone else never toggles).
+  useEffect(() => {
+    if (state !== "ready" || isPending) return;
+    if (!session?.user || role !== "student") return;
+
+    // "alive" = ignore the answer if the page was left first
+    let alive = true;
+    checkBookmark(id)
+      .then((data) => {
+        if (alive) setIsBookmarked(data.bookmarked);
+      })
+      .catch(() => {
+        // not critical — the button just starts as "Bookmark"
+      });
+    return () => {
+      alive = false;
+    };
+  }, [state, isPending, session, role, id]);
+
+  // Save / unsave this tuition (server enforces the 5-slot cap)
+  const onBookmarkToggle = async () => {
+    if (bookmarkBusy) return; // no double clicks
+    setBookmarkBusy(true);
+    try {
+      if (isBookmarked) {
+        const result = await removeBookmark(id);
+        setIsBookmarked(false);
+        toast.success(result.message || "Bookmark removed");
+      } else {
+        const result = await addBookmark(id);
+        setIsBookmarked(true);
+        toast.success(result.message || "Tuition bookmarked!");
+      }
+    } catch (err) {
+      // e.g. "Free plan allows up to 5 bookmarks. Upgrade to
+      // Pro for unlimited bookmarks" (403 from the server)
+      toast.warning(
+        err instanceof Error ? err.message : "Could not update bookmark",
+      );
+    } finally {
+      setBookmarkBusy(false);
+    }
+  };
 
   // After sign-in/sign-up, return to this listing and reopen the existing modal.
   useEffect(() => {
@@ -457,6 +519,51 @@ export default function TuitionDetails({ id }: { id: string }) {
                 </span>
               </p>
             )}
+
+            {/* BOOKMARK BUTTON — NEW requirement (2026-11-21).
+                Students toggle it (server enforces the free
+                5-slot limit), guests are sent to sign-in, and
+                tutors / admins see it disabled like Apply. */}
+            <button
+              type="button"
+              disabled={isBlocked || bookmarkBusy || isPending}
+              onClick={() => {
+                if (isPending) return; // session still loading — wait
+                if (isBlocked) return; // safety — already disabled
+                if (!session) {
+                  // not signed in → sign in first, then come back
+                  router.push(
+                    `/sign-in?callbackUrl=${encodeURIComponent(`/tuitions/${id}`)}`,
+                  );
+                  return;
+                }
+                void onBookmarkToggle();
+              }}
+              className={`mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-colors disabled:cursor-not-allowed ${
+                isBookmarked
+                  ? "bg-amber-50 text-amber-700 ring-1 ring-amber-300 hover:bg-amber-100 disabled:opacity-60"
+                  : "border border-emerald-600 bg-white text-emerald-700 hover:bg-emerald-50 disabled:border-slate-200 disabled:text-slate-400"
+              }`}
+            >
+              {isBookmarked ? (
+                <>
+                  <BookmarkCheck className="h-4 w-4" />
+                  Bookmarked ✓
+                </>
+              ) : (
+                <>
+                  <Bookmark className="h-4 w-4" />
+                  Bookmark
+                </>
+              )}
+            </button>
+            <p className="mt-2 text-center text-xs text-slate-400">
+              {isBlocked
+                ? "Bookmarks are disabled for your account type"
+                : isBookmarked
+                  ? "Saved to My Bookmarks — click to remove"
+                  : "Free plan: up to 5 bookmarks · Pro: unlimited"}
+            </p>
 
             {/* APPLY BUTTON — opens the HeroUI application modal.
                 Signed-out visitors just get a friendly toast;

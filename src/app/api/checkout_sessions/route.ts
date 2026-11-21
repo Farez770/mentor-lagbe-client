@@ -8,10 +8,13 @@ import { stripe } from "@/lib/stripe"; // Stripe client (server-only, key from .
 // POST /api/checkout_sessions — start a Stripe Checkout Session
 // for the Pro plan.
 //
-// Project requirement:
+// Project requirement (UPDATED 2026-11-21):
 //   "Set up Stripe Checkout Session for purchasing the Pro Plan
 //   (Pro Tutor Plan $15 for unlimited posts & verified badge;
-//   Pro Student Plan $10 for priority booking)."
+//   Pro Student Plan $10 for unlimited tuition bookmarks —
+//   Free students are limited to 5 bookmarks)."
+//   (the Pro Student benefit used to say "priority booking";
+//   the requirement replaced it with the bookmark limit)
 //
 // Rules enforced HERE (the browser can never influence prices):
 //   - you must be signed in (session cookie, checked server-side)
@@ -31,7 +34,10 @@ const PLANS = {
   },
   student: {
     name: "Pro Student Plan",
-    description: "Priority booking on tuition applications",
+    // shown by Stripe on its hosted checkout page — must match
+    // the CURRENT benefit (was "priority booking" before the
+    // 2026-11-21 requirement update)
+    description: "Unlimited tuition bookmarks (Free plan: max 5)",
     unitAmount: 1000, // $10.00
   },
 } as const;

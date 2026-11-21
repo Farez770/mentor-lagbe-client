@@ -142,7 +142,7 @@ function SuccessContent() {
             <p className="mx-auto mt-3 max-w-sm text-sm text-gray-500">
               {payment?.product === "tutor"
                 ? "Unlimited tuition posts and the verified tutor badge are unlocked."
-                : "Priority booking on your tuition applications is unlocked."}
+                : "Unlimited tuition bookmarks are unlocked — the Free plan stops at 5."}
             </p>
 
             {/* action buttons */}

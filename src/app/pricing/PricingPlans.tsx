@@ -52,23 +52,25 @@ const studentTiers: Tier[] = [
       { text: "Browse all tuition posts", included: true },
       { text: "Apply to tuitions", included: true },
       { text: "Track your applications", included: true },
-      { text: "Priority application review", included: false },
-      { text: "Priority booking on tuitions", included: false },
+      { text: "Bookmark up to 5 tuitions", included: true },
+      { text: "Unlimited tuition bookmarks", included: false },
       { text: "Pro badge on your profile", included: false },
     ],
   },
   {
     name: "Pro Student",
     price: 10, // $10 — the server catalog is the source of truth
-    tagline: "For learners who want priority",
+    // requirement update (2026-11-21): the benefit is unlimited
+    // bookmarks, not "priority booking" anymore
+    tagline: "For learners who want unlimited bookmarks",
     planId: "student",
     highlighted: true,
     features: [
       { text: "Browse all tuition posts", included: true },
       { text: "Apply to tuitions", included: true },
       { text: "Track your applications", included: true },
-      { text: "Priority application review", included: true },
-      { text: "Priority booking on tuitions", included: true },
+      { text: "Bookmark up to 5 tuitions", included: true },
+      { text: "Unlimited tuition bookmarks", included: true },
       { text: "Pro badge on your profile", included: true },
     ],
   },
@@ -334,7 +336,9 @@ export default function PricingPlans() {
         {/* ============ STUDENT TIERS ============ */}
         {renderGroup(
           "For Students",
-          "Apply faster and stand out with priority booking.",
+          // requirement update (2026-11-21): the student benefit
+          // is the bookmark limit (Free = 5, Pro = unlimited)
+          "Free students can bookmark 5 tuitions — Pro students unlimited.",
           studentTiers,
         )}
 

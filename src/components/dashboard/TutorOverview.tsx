@@ -17,7 +17,10 @@ import { getTuitionStats, type TutorStats } from "@/lib/api/tuitions";
 // The 4 stats required by the project:
 //   1. Total Tuitions Posted      -> GET /api/tuitions/stats
 //   2. Active / Approved Tuitions -> GET /api/tuitions/stats
-//   3. Total Applicants Received  -> 0 until the apply flow
+//   3. Total Applicants Received  -> GET /api/tuitions/stats
+//      (REAL count since 2026-11-21 — it used to be a
+//      hardcoded 0 with a TODO; the server now counts the
+//      "applications" collection for this tutor)
 //   4. Current Plan               -> the real session plan
 // The numbers are fetched inside the component below — this
 // file no longer has any hardcoded demo values.
@@ -126,10 +129,14 @@ export default function TutorOverview() {
       id: 3,
       label: "Total Applicants Received",
       value: applicants === undefined ? "…" : String(applicants),
-      // TODO (Phase 3): "+N new this week" once the
-      // applications collection exists
-      sub: "No applications yet",
-      dot: "bg-teal-500",
+      // REAL count since 2026-11-21 (see GET /api/tuitions/stats)
+      sub:
+        applicants === undefined
+          ? "Loading your applicants…"
+          : applicants > 0
+            ? `${applicants} ${applicants === 1 ? "student has" : "students have"} applied`
+            : "No applications yet",
+      dot: applicants ? "bg-emerald-500" : "bg-teal-500",
       accent: "amber" as const,
       icon: Users,
     },

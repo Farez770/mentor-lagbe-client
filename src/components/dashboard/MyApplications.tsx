@@ -25,7 +25,9 @@ import {
   cancelApplication,
   type MyApplication,
 } from "@/lib/api/applications";
-import { authClient } from "@/lib/auth-client"; // to read MY plan (free | pro)
+// ★ COMMENTED OUT (2026-11-21): only needed by the disabled
+//   priority-booking banner (see below) — uncomment together.
+// import { authClient } from "@/lib/auth-client";
 
 // ============================================================
 // MY APPLICATIONS page (/dashboard/student/my-applications)
@@ -60,11 +62,13 @@ export default function MyApplications() {
   // which application the confirm modal is open for (null = closed)
   const [cancelTarget, setCancelTarget] = useState<MyApplication | null>(null);
 
-  // PRIORITY BOOKING: my current plan — Pro students get a
-  // golden banner explaining that their applications are listed
-  // first in every tutor's applicant list.
-  const { data: session } = authClient.useSession();
-  const isPro = String(session?.user?.plan ?? "free").toLowerCase() === "pro";
+  // ★ REQUIREMENT UPDATE (2026-11-21): the PRIORITY BOOKING
+  //   session flag is DISABLED — the Pro student benefit is now
+  //   "unlimited bookmarks" (see lib/api/bookmarks.ts), so this
+  //   page no longer needs to know my plan. Uncomment both
+  //   lines together with the banner below if it returns.
+  // const { data: session } = authClient.useSession();
+  // const isPro = String(session?.user?.plan ?? "free").toLowerCase() === "pro";
 
   // ---------- load MY applications once ----------
   useEffect(() => {
@@ -166,13 +170,18 @@ export default function MyApplications() {
                   {applications.length === 1 ? "application" : "applications"}
                 </p>
               )}
-              {/* PRIORITY BOOKING — what the Pro plan bought you */}
+              {/* ★ REQUIREMENT UPDATE (2026-11-21): the Pro
+                  "priority booking" banner is DISABLED — the Pro
+                  student benefit is now "unlimited bookmarks"
+                  (see lib/api/bookmarks.ts). The isPro flag below
+                  is kept commented out for the same reason.
               {isPro && (
                 <p className="mt-2 inline-block rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-200">
                   ⭐ Pro plan: your applications appear first in tutors&apos;
                   applicant lists
                 </p>
               )}
+              */}
             </div>
             <div className="flex justify-center items-center">
               <Link

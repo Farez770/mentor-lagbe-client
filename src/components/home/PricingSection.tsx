@@ -26,10 +26,11 @@ const plans: {
     id: "student", // Pro Student = $10 (server catalog)
     name: "Pro Student",
     price: 10,
-    tagline: "For learners who want priority",
+    // requirement update (2026-11-21): benefit = unlimited
+    // bookmarks (Free plan stops at 5), not priority booking
+    tagline: "For learners who want unlimited bookmarks",
     features: [
       { text: "Apply to unlimited tuitions", included: true },
-      { text: "Priority application review", included: true },
       { text: "Bookmark unlimited tuitions", included: true },
       { text: "Pro badge on your profile", included: true },
       { text: "Post tuitions as a tutor", included: false },
@@ -229,7 +230,8 @@ export default function PricingSection() {
         <FadeIn delay={0.2}>
           <p className="text-center text-sm md:text-base text-slate-600 mt-8">
           Every account starts on the <b>Free plan</b> — students can apply to
-          tuitions, tutors can post up to <b>2 tuitions</b>. Upgrade anytime.
+          tuitions and bookmark up to <b>5 tuitions</b>, tutors can post up to{" "}
+          <b>2 tuitions</b>. Upgrade anytime.
           </p>
         </FadeIn>
       </div>
