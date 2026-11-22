@@ -49,10 +49,52 @@ export function getMyTuitions() {
   return apiFetch<{ tuitions: PostedTuition[] }>("/api/tuitions/mine");
 }
 
+// The options returned by the server for the three dropdowns.
+// They come from ALL approved+active tuitions, not just the
+// filtered result, so the dropdowns never shrink mid-search.
+export type TuitionFacets = {
+  subjects: string[];
+  classLevels: string[];
+  modes: string[];
+};
+
+// The full answer from GET /api/tuitions.
+export type TuitionListResponse = {
+  tuitions: PostedTuition[];
+  total: number; // tuitions matching the current search/filter
+  totalAvailable: number; // all approved+active tuitions
+  facets: TuitionFacets;
+};
+
+// Optional server-side filters. Values of "all"/"" are omitted
+// from the request, so the backend treats them as "no filter".
+export type TuitionFilters = {
+  q?: string;
+  subject?: string;
+  classLevel?: string;
+  mode?: string;
+};
+
 // GET /api/tuitions — the PUBLIC list (Browse Tuitions page),
 // newest first. No login needed.
-export function getTuitions() {
-  return apiFetch<{ tuitions: PostedTuition[] }>("/api/tuitions");
+//
+// CHALLENGE 1: the search/filter values are sent to Express as URL
+// query params, so MongoDB does the filtering before the response
+// is returned. Example: /api/tuitions?q=math&mode=Online
+export function getTuitions(filters: TuitionFilters = {}) {
+  const params = new URLSearchParams();
+
+  Object.entries(filters).forEach(([key, value]) => {
+    const clean = (value ?? "").trim();
+    if (clean && clean.toLowerCase() !== "all") {
+      params.set(key, clean);
+    }
+  });
+
+  const query = params.toString();
+  return apiFetch<TuitionListResponse>(
+    query ? `/api/tuitions?${query}` : "/api/tuitions",
+  );
 }
 
 // The four numbers shown on the tutor Overview dashboard

@@ -3,7 +3,14 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { GraduationCap, LogOut, Menu, X } from "lucide-react";
+import {
+  GraduationCap,
+  LogOut,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  X,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { toast } from "@heroui/react";
 import { authClient } from "@/lib/auth-client";
@@ -54,12 +61,14 @@ function SidebarContent({
   user,
   onNavigate,
   onClose,
+  collapsed = false,
 }: {
   title: string;
   sections: DashboardSection[];
   user: DashboardUser;
   onNavigate?: () => void; // called after a link is clicked (closes the mobile menu)
   onClose?: () => void; // only passed in the mobile overlay → shows the ✕ button
+  collapsed?: boolean; // desktop-only icon rail; mobile overlay stays full width
 }) {
   const pathname = usePathname(); // current page (for the active highlight)
   const router = useRouter();
@@ -91,13 +100,17 @@ function SidebarContent({
       {/* ======================================================
           [1] LOGO + NAME OF THE WEBSITE (emerald header)
           ====================================================== */}
-      <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-white">
-        <div className="flex items-center gap-3">
+      <div
+        className={`flex items-center justify-between gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white ${
+          collapsed ? "p-3 lg:justify-center lg:p-4" : "p-5"
+        }`}
+      >
+        <div className={`flex items-center gap-3 ${collapsed ? "lg:gap-0" : ""}`}>
           {/* Same logo mark as the site navbar */}
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15">
             <GraduationCap className="h-6 w-6" />
           </span>
-          <div className="min-w-0">
+          <div className={`min-w-0 ${collapsed ? "lg:hidden" : ""}`}>
             <p className="text-base font-extrabold leading-tight">
               MentorLagbe
             </p>
@@ -121,7 +134,11 @@ function SidebarContent({
       {/* ======================================================
           [2] USER CARD — avatar + name + role + premium badge
           ====================================================== */}
-      <div className="flex items-center gap-3 border-b border-slate-100 p-4">
+      <div
+        className={`flex items-center gap-3 border-b border-slate-100 ${
+          collapsed ? "lg:justify-center lg:p-3" : "p-4"
+        }`}
+      >
         {/* Profile photo from the session — falls back to the
             first letter of the name when there is no image */}
         {user.image ? (
@@ -129,15 +146,21 @@ function SidebarContent({
           <img
             src={user.image}
             alt={user.name}
-            className="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-emerald-100"
+            className={`h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-emerald-100 ${
+              collapsed ? "lg:h-10 lg:w-10" : ""
+            }`}
           />
         ) : (
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-lg font-extrabold text-emerald-700">
+          <span
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-lg font-extrabold text-emerald-700 ${
+              collapsed ? "lg:h-10 lg:w-10 lg:text-base" : ""
+            }`}
+          >
             {user.name.charAt(0)}
           </span>
         )}
 
-        <div className="min-w-0">
+        <div className={`min-w-0 ${collapsed ? "lg:hidden" : ""}`}>
           {/* User name */}
           <p className="truncate text-sm font-bold text-slate-800">
             {user.name}
@@ -185,14 +208,21 @@ function SidebarContent({
                 // After navigating, close the mobile overlay
                 // (a harmless no-op on desktop)
                 onClick={onNavigate}
-                className={`flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                // In the collapsed desktop rail the label is hidden,
+                // so the native tooltip keeps each icon identifiable.
+                title={section.name}
+                className={`flex cursor-pointer items-center gap-3 rounded-xl py-3 text-sm font-semibold transition-colors ${
+                  collapsed ? "lg:justify-center lg:px-0" : "px-4"
+                } ${
                   active
                     ? "bg-emerald-50 text-emerald-700" // current page
                     : "text-slate-600 hover:bg-slate-50 hover:text-emerald-600"
                 }`}
               >
-                <Icon className="h-5 w-5" />
-                {section.name}
+                <Icon className="h-5 w-5 shrink-0" />
+                <span className={collapsed ? "lg:hidden" : ""}>
+                  {section.name}
+                </span>
               </Link>
             );
           })}
@@ -202,20 +232,38 @@ function SidebarContent({
       {/* ======================================================
           [4] THEME + LOGOUT — always at the bottom
           ====================================================== */}
-      <div className="border-t border-slate-100 p-4">
+      <div
+        className={`border-t border-slate-100 ${
+          collapsed ? "lg:p-3" : "p-4"
+        }`}
+      >
         {/* Dark/light switcher lives here on desktop so every
             dashboard route has it inside the fixed sidebar. */}
-        <div className="mb-3 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2">
-          <span className="text-xs font-bold text-slate-600">Appearance</span>
+        <div
+          className={`mb-3 flex items-center justify-between rounded-xl bg-slate-50 py-2 ${
+            collapsed ? "lg:justify-center lg:px-0" : "px-3"
+          }`}
+        >
+          <span
+            className={`text-xs font-bold text-slate-600 ${
+              collapsed ? "lg:hidden" : ""
+            }`}
+          >
+            Appearance
+          </span>
           <ThemeToggle compact />
         </div>
         <button
           type="button"
           onClick={handleSignOut}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-600 transition-colors hover:bg-rose-100"
+          aria-label="Sign out"
+          title="Sign out"
+          className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 py-3 text-sm font-bold text-rose-600 transition-colors hover:bg-rose-100 ${
+            collapsed ? "lg:px-0" : "px-4"
+          }`}
         >
-          <LogOut className="h-4 w-4" />
-          Logout / Sign Out
+          <LogOut className="h-4 w-4 shrink-0" />
+          <span className={collapsed ? "lg:hidden" : ""}>Logout / Sign Out</span>
         </button>
       </div>
     </>
@@ -240,6 +288,11 @@ export default function DashboardDrawer({
 }) {
   // Is the mobile / tablet menu open?
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Is the DESKTOP sidebar collapsed into an icon-only rail?
+  // The toggle lives in the new top bar so desktop users get the
+  // same collapsible behaviour the mobile drawer already had.
+  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
 
   // ============================================================
   // THE REAL LOGGED-IN USER (BetterAuth session).
@@ -289,52 +342,80 @@ export default function DashboardDrawer({
     <div className="flex h-dvh">
       {/* ======================================================
           DESKTOP SIDEBAR — hidden below lg, always there on
-          desktop. Fixed width (w-80), full height of the shell.
+          desktop. Width animates between 288px and 80px when
+          the top-bar toggle is clicked.
           ====================================================== */}
       <aside
         id="dashboard-sidebar"
-        className="hidden w-80 shrink-0 flex-col border-r border-slate-200 bg-white lg:flex"
+        className={`hidden shrink-0 flex-col border-r border-slate-200 bg-white transition-[width] duration-300 ease-in-out lg:flex ${
+          isDesktopCollapsed ? "lg:w-20" : "lg:w-72"
+        }`}
       >
         <SidebarContent
           title={title}
           sections={sections}
           user={shownUser}
+          collapsed={isDesktopCollapsed}
           // Desktop has no overlay to close — this is a no-op
           onNavigate={() => setIsMenuOpen(false)}
         />
       </aside>
 
       {/* ======================================================
-          RIGHT SIDE = menu bar (mobile/tablet) + content
+          RIGHT SIDE = TOP BAR + scrollable page content
           ====================================================== */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* ---- MENU BAR — only on mobile & tablet (lg:hidden) ----
-            The ☰ button opens the menu so the user can see all
-            the page routes. On desktop this bar is not needed
-            (the sidebar is always visible). */}
-        <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 lg:hidden">
+        {/* ---- TOP BAR — visible on every screen size ----
+            Mobile/tablet: ☰ opens the overlay drawer.
+            Desktop: the panel icon collapses/expands the fixed
+            sidebar into an icon-only rail. */}
+        <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 md:px-5">
           <div className="flex min-w-0 items-center gap-2">
-            {/* ☰ open-menu button */}
+            {/* ☰ open-menu button — mobile/tablet only */}
             <button
               type="button"
               onClick={() => setIsMenuOpen(true)}
               aria-label="Open menu"
               aria-expanded={isMenuOpen}
-              className="cursor-pointer rounded-lg p-2 text-slate-700 transition-colors hover:bg-slate-100"
+              className="cursor-pointer rounded-lg p-2 text-slate-700 transition-colors hover:bg-slate-100 lg:hidden"
             >
               <Menu className="h-5 w-5" />
+            </button>
+
+            {/* Collapse/expand button — desktop only */}
+            <button
+              type="button"
+              onClick={() =>
+                setIsDesktopCollapsed((collapsed) => !collapsed)
+              }
+              aria-label={
+                isDesktopCollapsed ? "Expand sidebar" : "Collapse sidebar"
+              }
+              aria-expanded={!isDesktopCollapsed}
+              className="hidden cursor-pointer rounded-lg p-2 text-slate-700 transition-colors hover:bg-slate-100 lg:inline-flex"
+            >
+              {isDesktopCollapsed ? (
+                <PanelLeftOpen className="h-5 w-5" />
+              ) : (
+                <PanelLeftClose className="h-5 w-5" />
+              )}
             </button>
 
             {/* Small logo + page title */}
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-600">
               <GraduationCap className="h-5 w-5 text-white" />
             </span>
-            <p className="truncate text-sm font-extrabold text-slate-800">
-              {title}
-            </p>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-extrabold text-slate-800">
+                {title}
+              </p>
+              <p className="hidden truncate text-xs text-slate-500 md:block">
+                Signed in as {shownUser.name} · {shownUser.role}
+              </p>
+            </div>
           </div>
 
-          {/* Theme switcher + small avatar so the user still sees who they are */}
+          {/* Theme switcher + avatar/name so the user is always visible */}
           <div className="flex items-center gap-2">
             <ThemeToggle compact />
             {shownUser.image ? (
@@ -349,6 +430,14 @@ export default function DashboardDrawer({
                 {shownUser.name.charAt(0)}
               </span>
             )}
+            <div className="hidden min-w-0 text-right sm:block">
+              <p className="truncate text-xs font-bold text-slate-800">
+                {shownUser.name}
+              </p>
+              <p className="truncate text-[11px] text-slate-500">
+                {shownUser.role} · {shownUser.plan}
+              </p>
+            </div>
           </div>
         </div>
 

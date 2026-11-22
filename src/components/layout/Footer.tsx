@@ -37,10 +37,13 @@ export default function Footer() {
             join subject-wise batches, and book 1-on-1 mentorship sessions.
           </p>
 
-          {/* Social media icons (X is the new logo, not the old bird) */}
+          {/* Social media icons (X is the new logo, not the old bird).
+              Real platform URLs replace the old "#" placeholders. */}
           <div className="flex gap-3 mt-5">
             <a
-              href="#"
+              href="https://www.facebook.com/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"
               aria-label="Facebook"
             >
@@ -49,7 +52,9 @@ export default function Footer() {
               </svg>
             </a>
             <a
-              href="#"
+              href="https://www.youtube.com/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"
               aria-label="YouTube"
             >
@@ -59,7 +64,9 @@ export default function Footer() {
             </a>
             {/* New X logo */}
             <a
-              href="#"
+              href="https://x.com/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"
               aria-label="X (Twitter)"
             >
@@ -68,7 +75,9 @@ export default function Footer() {
               </svg>
             </a>
             <a
-              href="#"
+              href="https://www.linkedin.com/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"
               aria-label="LinkedIn"
             >

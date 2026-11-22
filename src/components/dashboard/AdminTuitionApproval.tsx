@@ -140,7 +140,7 @@ export default function AdminTuitionApproval() {
         // swaps in the REAL logged-in admin automatically.
         user={{ name: demoAdmin.name, role: "Admin", plan: demoAdmin.plan }}
       >
-        <div className="mx-auto mt-16 max-w-5xl px-4">
+        <div className="mx-auto mt-12 max-w-5xl px-4">
           {/* ---------- Page heading ---------- */}
           <div className="mb-5">
             {/* tiny eyebrow label above the title */}
@@ -202,8 +202,8 @@ export default function AdminTuitionApproval() {
                 No tuition posts yet
               </h2>
               <p className="mx-auto mt-1.5 max-w-md text-sm text-slate-600">
-                Nothing to review — posts appear here as soon as a tutor
-                submits one.
+                Nothing to review — posts appear here as soon as a tutor submits
+                one.
               </p>
             </div>
           ) : (

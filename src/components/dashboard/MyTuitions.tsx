@@ -150,7 +150,7 @@ export default function MyTuitions() {
         // loads — the drawer swaps in the REAL logged-in user.
         user={{ name: demoTutor.name, role: "Tutor", plan: demoTutor.plan }}
       >
-        <div className="mx-auto mt-16 max-w-5xl px-4">
+        <div className="mx-auto mt-12 max-w-5xl px-4">
           {/* ---------- Page heading ---------- */}
           <div className="mb-5">
             <p className="text-xs font-bold tracking-widest text-emerald-700">

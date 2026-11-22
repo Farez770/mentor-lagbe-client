@@ -99,7 +99,7 @@ export default function AdminTransactions() {
         // swaps in the REAL logged-in admin automatically.
         user={{ name: demoAdmin.name, role: "Admin", plan: demoAdmin.plan }}
       >
-        <div className="mx-auto mt-16 max-w-6xl px-4">
+        <div className="mx-auto mt-12 max-w-6xl px-4">
           {/* ---------- Page heading ---------- */}
           <div className="mb-5">
             {/* tiny eyebrow label above the title */}
@@ -112,14 +112,15 @@ export default function AdminTransactions() {
             </h1>
             {/* one-line explanation of what this page shows */}
             <p className="mt-1.5 text-sm text-gray-600">
-              Every verified Stripe payment on MentorLagbe — who paid, for
-              which plan, how much and when.
+              Every verified Stripe payment on MentorLagbe — who paid, for which
+              plan, how much and when.
             </p>
             {/* pills: row count + total revenue (once loaded) */}
             {txs !== null && !loadError && (
               <span className="mt-2 flex flex-wrap gap-2">
                 <p className="inline-block rounded-full bg-white px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
-                  {txs.length} {txs.length === 1 ? "transaction" : "transactions"}
+                  {txs.length}{" "}
+                  {txs.length === 1 ? "transaction" : "transactions"}
                 </p>
                 <p className="inline-block rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white ring-1 ring-emerald-600">
                   Total ${totalRevenue.toFixed(2)}
@@ -199,9 +200,7 @@ export default function AdminTransactions() {
                         {t.userName}
                       </td>
                       {/* email */}
-                      <td className="px-4 py-3 text-gray-600">
-                        {t.userEmail}
-                      </td>
+                      <td className="px-4 py-3 text-gray-600">{t.userEmail}</td>
                       {/* role badge (same colors as User Management) */}
                       <td className="px-4 py-3">
                         <span
@@ -213,9 +212,7 @@ export default function AdminTransactions() {
                         </span>
                       </td>
                       {/* what was bought */}
-                      <td className="px-4 py-3 text-gray-700">
-                        {t.planName}
-                      </td>
+                      <td className="px-4 py-3 text-gray-700">{t.planName}</td>
                       {/* amount — $10.00 / $15.00 (green = money IN) */}
                       <td className="px-4 py-3 text-right font-bold text-emerald-700">
                         ${t.amount.toFixed(2)}{" "}

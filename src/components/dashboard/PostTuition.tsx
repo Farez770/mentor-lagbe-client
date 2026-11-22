@@ -232,7 +232,7 @@ export default function PostTuition() {
         // (name, role, plan, photo) automatically.
         user={{ name: demoTutor.name, role: "Tutor", plan: demoTutor.plan }}
       >
-        <div className="mx-auto mt-16 max-w-4xl px-4">
+        <div className="mx-auto mt-12 max-w-4xl px-4">
           {/* ====================================================
               The white card that contains the whole form
               ==================================================== */}

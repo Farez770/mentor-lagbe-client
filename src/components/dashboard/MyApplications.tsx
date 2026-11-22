@@ -6,14 +6,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Modal, toast } from "@heroui/react";
-import {
-  Ban,
-  CalendarDays,
-  Mail,
-  Plus,
-  Send,
-  User,
-} from "lucide-react";
+import { Ban, CalendarDays, Mail, Plus, Send, User } from "lucide-react";
 import { LoadingSpinner } from "@/components/shared/Loading"; // shared loader
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
 import {
@@ -149,7 +142,7 @@ export default function MyApplications() {
           plan: demoStudent.plan,
         }}
       >
-        <div className="mx-auto mt-16 max-w-5xl px-4">
+        <div className="mx-auto mt-12 max-w-5xl px-4">
           {/* ---------- Page heading ---------- */}
           <div className="mb-5 flex justify-between">
             <div>

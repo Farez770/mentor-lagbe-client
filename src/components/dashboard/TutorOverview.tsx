@@ -180,7 +180,7 @@ export default function TutorOverview() {
         // (name, role, plan, photo) automatically.
         user={{ name: demoTutor.name, role: "Tutor", plan: demoTutor.plan }}
       >
-        <div className="max-w-7xl mx-auto px-4 mt-16">
+        <div className="max-w-7xl mx-auto px-4 mt-12">
           {/* ====================================================
               WELCOME HEADER (green gradient banner)
               py-6 = a small, tidy gap below the navbar

@@ -78,7 +78,10 @@ export default function ManageApplicants() {
   // Accept or reject one application
   // (PATCH /api/applications/:id)
   // ------------------------------------------------------------
-  const onDecide = async (app: Application, status: "accepted" | "rejected") => {
+  const onDecide = async (
+    app: Application,
+    status: "accepted" | "rejected",
+  ) => {
     setBusyId(app.id); // disable this card's buttons
     try {
       const result = await updateApplicationStatus(app.id, status);
@@ -116,7 +119,7 @@ export default function ManageApplicants() {
         // swaps in the REAL logged-in user automatically.
         user={{ name: demoTutor.name, role: "Tutor", plan: demoTutor.plan }}
       >
-        <div className="mx-auto mt-16 max-w-5xl px-4">
+        <div className="mx-auto mt-12 max-w-5xl px-4">
           {/* ---------- Page heading ---------- */}
           <div className="mb-5">
             <p className="text-xs font-bold tracking-widest text-emerald-700">
@@ -161,8 +164,8 @@ export default function ManageApplicants() {
                 Could not load your applicants
               </h2>
               <p className="mx-auto mt-1.5 max-w-md text-sm text-slate-600">
-                Something went wrong while talking to the server. Check that
-                the API server is running, then try again.
+                Something went wrong while talking to the server. Check that the
+                API server is running, then try again.
               </p>
               <button
                 type="button"
@@ -183,8 +186,8 @@ export default function ManageApplicants() {
                 No applications yet
               </h2>
               <p className="mx-auto mt-1.5 max-w-md text-sm text-slate-600">
-                When students apply to your tuition posts, they appear here
-                with their contact details, preferred schedule and note.
+                When students apply to your tuition posts, they appear here with
+                their contact details, preferred schedule and note.
               </p>
             </div>
           ) : (
@@ -228,7 +231,8 @@ export default function ManageApplicants() {
                     </div>
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-bold ${
-                        statusStyles[app.status] ?? "bg-slate-100 text-slate-600"
+                        statusStyles[app.status] ??
+                        "bg-slate-100 text-slate-600"
                       }`}
                     >
                       {capitalize(app.status)}

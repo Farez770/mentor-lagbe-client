@@ -10,7 +10,10 @@ import StatCard from "@/components/dashboard/StatCard";
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
 // The sidebar sections + demo student are shared with the
 // other student pages — see studentData.ts
-import { demoStudent, studentSections } from "@/components/dashboard/studentData";
+import {
+  demoStudent,
+  studentSections,
+} from "@/components/dashboard/studentData";
 import { authClient } from "@/lib/auth-client";
 import { getStudentStats, type StudentStats } from "@/lib/api/applications";
 
@@ -132,7 +135,10 @@ export default function StudentOverview() {
       id: 4,
       label: "Current Plan",
       value: plan, // real plan from the session (Free/Pro)
-      sub: plan === "Free" ? "You are on the Free plan" : "Pro benefits are active",
+      sub:
+        plan === "Free"
+          ? "You are on the Free plan"
+          : "Pro benefits are active",
       dot: "bg-rose-500",
       accent: "rose" as const,
       icon: Sparkles,
@@ -167,7 +173,7 @@ export default function StudentOverview() {
           plan: demoStudent.plan,
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 mt-16">
+        <div className="max-w-7xl mx-auto px-4 mt-12">
           {/* ====================================================
               WELCOME HEADER (green gradient banner — same
               design as the tutor overview)
@@ -185,8 +191,7 @@ export default function StudentOverview() {
                   Welcome back, {displayName}! 👋
                 </h1>
                 <p className="mt-2 text-sm md:text-base text-emerald-50">
-                  Track the tuitions you applied to and what the tutors
-                  decided.
+                  Track the tuitions you applied to and what the tutors decided.
                 </p>
               </div>
 

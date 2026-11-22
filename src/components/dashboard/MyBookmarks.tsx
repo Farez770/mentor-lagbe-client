@@ -158,7 +158,7 @@ export default function MyBookmarks() {
           plan: demoStudent.plan,
         }}
       >
-        <div className="mx-auto mt-16 max-w-5xl px-4">
+        <div className="mx-auto mt-12 max-w-5xl px-4">
           {/* ---------- Page heading ---------- */}
           <div className="mb-5 flex justify-between">
             <div>
@@ -204,8 +204,8 @@ export default function MyBookmarks() {
                 Could not load your bookmarks
               </h2>
               <p className="mx-auto mt-1.5 max-w-md text-sm text-slate-600">
-                Something went wrong while talking to the server. Check that
-                the API server is running, then try again.
+                Something went wrong while talking to the server. Check that the
+                API server is running, then try again.
               </p>
               <button
                 type="button"
@@ -293,7 +293,10 @@ export default function MyBookmarks() {
                           {row.tuition.subject} · {row.tuition.classLevel}
                         </p>
                         <p className="flex items-center gap-2">
-                          <User size={14} className="shrink-0 text-emerald-600" />
+                          <User
+                            size={14}
+                            className="shrink-0 text-emerald-600"
+                          />
                           {row.tuition.tutorName}
                         </p>
                         <p className="flex items-center gap-2 sm:col-span-2">

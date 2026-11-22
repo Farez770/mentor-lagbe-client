@@ -173,7 +173,7 @@ export default function UpdateProfile() {
         // swaps in the REAL logged-in user automatically.
         user={{ name: demoTutor.name, role: "Tutor", plan: demoTutor.plan }}
       >
-        <div className="mx-auto mt-16 max-w-2xl px-4">
+        <div className="mx-auto mt-12 max-w-2xl px-4">
           {/* ---------- Page heading ---------- */}
           <div className="mb-5">
             <p className="text-xs font-bold tracking-widest text-emerald-700">
@@ -183,8 +183,8 @@ export default function UpdateProfile() {
               Update Profile
             </h1>
             <p className="mt-1.5 text-sm text-gray-600">
-              Your name, contact details and photo — shown to students who
-              view your tuitions and to tutors you apply to.
+              Your name, contact details and photo — shown to students who view
+              your tuitions and to tutors you apply to.
             </p>
           </div>
 
@@ -227,8 +227,8 @@ export default function UpdateProfile() {
                   className={inputClass + " mt-2"}
                 />
                 <p className="mt-1 text-xs text-slate-400">
-                  JPG or PNG — uploaded to ImgBB, or paste any direct image
-                  URL. Clear the box to remove your picture.
+                  JPG or PNG — uploaded to ImgBB, or paste any direct image URL.
+                  Clear the box to remove your picture.
                 </p>
               </div>
             </div>

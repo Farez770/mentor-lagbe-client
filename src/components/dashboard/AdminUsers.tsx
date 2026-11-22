@@ -131,7 +131,7 @@ export default function AdminUsers() {
         // swaps in the REAL logged-in admin automatically.
         user={{ name: demoAdmin.name, role: "Admin", plan: demoAdmin.plan }}
       >
-        <div className="mx-auto mt-16 max-w-5xl px-4">
+        <div className="mx-auto mt-12 max-w-5xl px-4">
           {/* ---------- Page heading ---------- */}
           <div className="mb-5">
             {/* tiny eyebrow label above the title */}
@@ -257,7 +257,8 @@ export default function AdminUsers() {
                         {/* colored badge showing the CURRENT role */}
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-bold ${
-                            roleStyles[user.role] ?? "bg-slate-100 text-slate-600"
+                            roleStyles[user.role] ??
+                            "bg-slate-100 text-slate-600"
                           }`}
                         >
                           {capitalize(user.role)}

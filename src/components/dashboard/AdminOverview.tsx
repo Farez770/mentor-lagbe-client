@@ -107,8 +107,7 @@ export default function AdminOverview() {
       id: 3,
       label: "Pending vs. Approved",
       // e.g. "3 / 12" — pending first, approved second
-      value:
-        pending === undefined ? "…" : `${pending} / ${approved}`,
+      value: pending === undefined ? "…" : `${pending} / ${approved}`,
       sub:
         pending === undefined
           ? "Loading platform stats…"
@@ -158,7 +157,7 @@ export default function AdminOverview() {
           plan: demoAdmin.plan,
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 mt-16">
+        <div className="max-w-7xl mx-auto px-4 mt-12">
           {/* ====================================================
               WELCOME HEADER (same green banner as the other
               dashboard overviews)
@@ -206,8 +205,8 @@ export default function AdminOverview() {
               </h2>
               <p className="mx-auto mt-1.5 max-w-md text-sm text-slate-600">
                 This page is for admin accounts only. Check that you&apos;re
-                signed in as an admin and that the API server is running,
-                then try again.
+                signed in as an admin and that the API server is running, then
+                try again.
               </p>
               <button
                 type="button"

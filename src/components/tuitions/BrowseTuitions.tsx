@@ -1,33 +1,106 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Search, ChevronDown, X } from "lucide-react";
 import { LoadingSpinner } from "@/components/shared/Loading"; // shared loading UI
 import SectionHeading from "@/components/shared/SectionHeading";
 import FadeIn from "@/components/shared/FadeIn";
 import TuitionCard, { type Tuition } from "@/components/tuitions/TuitionCard";
-import { getTuitions } from "@/lib/api/tuitions";
+import {
+  getTuitions,
+  type TuitionFacets,
+} from "@/lib/api/tuitions";
 
 // ============================================================
-// REAL TUITION DATA — fetched from GET /api/tuitions
-// (the old 9-item demo array is gone; the grid below shows
-// whatever tutors have actually posted to the database)
+// CHALLENGE 1: SERVER-SIDE SEARCH + FILTER
+//
+// This component no longer filters a big array in the browser.
+// Instead, every search/filter choice is written into the URL
+// (e.g. /tuitions?q=physics&subject=Physics&mode=Online) and
+// getTuitions() sends those values to Express as query params.
+// MongoDB does the filtering and returns only matching rows.
+//
+// Keeping the values in the URL also means a filtered result page
+// can be bookmarked, shared, refreshed, or used with back/forward.
 // ============================================================
+
+const EMPTY_FACETS: TuitionFacets = {
+  subjects: [],
+  classLevels: [],
+  modes: [],
+};
+
+// Always show "All ..." first, then the values coming from the API.
+function withAllOption(values: string[]) {
+  return [
+    "all",
+    ...values.filter((value) => value.toLowerCase() !== "all"),
+  ];
+}
 
 // ============================================================
 // The Browse Tuitions page content:
 // heading -> search + filter toolbar -> grid of cards
 // ============================================================
 export default function BrowseTuitions() {
-  // ---- Filter states (what the user has chosen so far) ----
-  // search   = text typed into the search box
-  // subject  = chosen subject dropdown value ("all" = no filter)
-  // classLevel = chosen class level dropdown value
-  // mode     = chosen Online/Offline dropdown value
-  const [search, setSearch] = useState("");
-  const [subject, setSubject] = useState("all");
-  const [classLevel, setClassLevel] = useState("all");
-  const [mode, setMode] = useState("all");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // ---- Filter values live in the URL (single source of truth) ----
+  const paramsString = searchParams.toString();
+  const q = searchParams.get("q") ?? "";
+  const subject = searchParams.get("subject") ?? "all";
+  const classLevel = searchParams.get("classLevel") ?? "all";
+  const mode = searchParams.get("mode") ?? "all";
+
+  // The text input needs a tiny local state so typing feels instant.
+  // After 350ms of inactivity it is written back into the URL.
+  const [searchInput, setSearchInput] = useState(q);
+  const [lastSyncedQ, setLastSyncedQ] = useState(q);
+
+  // Keep the input in sync when the URL changes (back/forward,
+  // "Clear Filters", or a link someone pasted into the address bar).
+  // React recommends adjusting state during render for this exact
+  // "mirror a prop into state" case — it avoids a cascading effect.
+  if (q !== lastSyncedQ) {
+    setLastSyncedQ(q);
+    setSearchInput(q);
+  }
+
+  // Update one or more query params without losing the others.
+  // Empty and "all" values are removed instead of written as junk.
+  const commitParams = useCallback(
+    (updates: Record<string, string>) => {
+      const params = new URLSearchParams(paramsString);
+
+      Object.entries(updates).forEach(([key, value]) => {
+        const clean = value.trim();
+        if (!clean || clean.toLowerCase() === "all") {
+          params.delete(key);
+        } else {
+          params.set(key, clean);
+        }
+      });
+
+      const query = params.toString();
+      router.replace(query ? `/tuitions?${query}` : "/tuitions", {
+        scroll: false,
+      });
+    },
+    [paramsString, router],
+  );
+
+  // Debounce the search box so we do not call the API on every keystroke.
+  useEffect(() => {
+    if (searchInput === q) return;
+
+    const timer = window.setTimeout(() => {
+      commitParams({ q: searchInput });
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [searchInput, q, commitParams]);
 
   // ============================================================
   // REAL tuitions from GET /api/tuitions.
@@ -35,15 +108,20 @@ export default function BrowseTuitions() {
   // the API answers (or the empty state on failure).
   // ============================================================
   const [tuitions, setTuitions] = useState<Tuition[]>([]);
+  const [facets, setFacets] = useState<TuitionFacets>(EMPTY_FACETS);
+  const [matchedTotal, setMatchedTotal] = useState(0);
+  const [totalAvailable, setTotalAvailable] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // "alive" = ignore the answer if the page was left first
     let alive = true;
 
-    getTuitions()
+    // Every argument here becomes a URL query param on the backend.
+    getTuitions({ q, subject, classLevel, mode })
       .then((data) => {
         if (!alive) return;
+
         // The API shape (tutorName, approvalStatus) is mapped
         // to the card's shape (tutor, status)
         setTuitions(
@@ -62,89 +140,59 @@ export default function BrowseTuitions() {
             isActive: item.isActive,
           })),
         );
+        setFacets(data.facets ?? EMPTY_FACETS);
+        setMatchedTotal(data.total ?? data.tuitions.length);
+        setTotalAvailable(data.totalAvailable ?? data.tuitions.length);
       })
       .catch((err) => {
         // e.g. API server not running → show the empty state
         console.warn("Could not load tuitions:", err);
-        if (alive) setTuitions([]);
+        if (alive) {
+          setTuitions([]);
+          setMatchedTotal(0);
+          setTotalAvailable(0);
+        }
       })
       .finally(() => {
         if (alive) setIsLoading(false);
       });
 
-    // cleanup: never set state after unmount
+    // cleanup: never set state after unmount, and cancel a slow
+    // request as soon as the user changes a filter
     return () => {
       alive = false;
     };
-  }, []); // [] = run once when the page opens
+  }, [q, subject, classLevel, mode]);
 
-  // ---- Build the dropdown options from the data itself ----
-  // new Set(...) removes duplicate values, the spread [...set]
-  // turns it back into an array, and "all" is added at the front
-  // so the first option always means "show everything".
-  const subjectOptions = [
-    "all",
-    ...new Set(tuitions.map((tuition) => tuition.subject)),
-  ];
-  const classLevelOptions = [
-    "all",
-    ...new Set(tuitions.map((tuition) => tuition.classLevel)),
-  ];
-  const modeOptions = [
-    "all",
-    ...new Set(tuitions.map((tuition) => tuition.mode)),
-  ];
+  // Safety net: even though the API already returns only approved +
+  // active rows, never render a pending/rejected/closed listing here.
+  const visibleTuitions = tuitions.filter(
+    (tuition) => tuition.status === "approved" && tuition.isActive,
+  );
 
-  // Lowercased search text once, so the comparisons below are easy
-  const keyword = search.trim().toLowerCase();
-
-  // ---- The filtering (this is the heart of the page) ----
-  // Keep a tuition only when it passes EVERY check below.
-  const filteredTuitions = tuitions.filter((tuition) => {
-    // 1) ONLY approved + active listings are public. The API
-    //    (GET /api/tuitions) already returns just those — this
-    //    second check is a safety net so a pending/rejected or
-    //    closed post can never leak onto this page.
-    if (tuition.status !== "approved") return false;
-    if (!tuition.isActive) return false;
-
-    // 2) Search box: the keyword must appear in the title,
-    //    subject, tutor name or class level (or box is empty)
-    const matchesSearch =
-      keyword === "" ||
-      tuition.title.toLowerCase().includes(keyword) ||
-      tuition.subject.toLowerCase().includes(keyword) ||
-      tuition.tutor.toLowerCase().includes(keyword) ||
-      tuition.classLevel.toLowerCase().includes(keyword);
-
-    // 3) Subject dropdown: "all" means don't filter by subject
-    const matchesSubject = subject === "all" || tuition.subject === subject;
-
-    // 4) Class level dropdown: "all" means don't filter by class
-    const matchesClass =
-      classLevel === "all" || tuition.classLevel === classLevel;
-
-    // 5) Mode dropdown: "all" means don't filter by Online/Offline
-    const matchesMode = mode === "all" || tuition.mode === mode;
-
-    // Keep the card only if the search + every dropdown matches
-    return matchesSearch && matchesSubject && matchesClass && matchesMode;
-  });
+  // Dropdown choices come from the server's UNFILTERED public data,
+  // so picking one option does not remove the other options.
+  const subjectOptions = withAllOption(facets.subjects);
+  const classLevelOptions = withAllOption(facets.classLevels);
+  const modeOptions = withAllOption(facets.modes);
 
   // True when the user has typed or selected anything at all
   // (used to decide whether to show the "Clear Filters" button)
   const hasActiveFilter =
-    search !== "" ||
+    searchInput !== "" ||
     subject !== "all" ||
     classLevel !== "all" ||
     mode !== "all";
 
   // Reset every filter back to its starting value
   const clearFilters = () => {
-    setSearch("");
-    setSubject("all");
-    setClassLevel("all");
-    setMode("all");
+    setSearchInput("");
+    commitParams({
+      q: "",
+      subject: "all",
+      classLevel: "all",
+      mode: "all",
+    });
   };
 
   // Shared style for the three dropdowns
@@ -169,13 +217,13 @@ export default function BrowseTuitions() {
           <div className="relative">
             {/* Search icon, sitting inside the input on the left */}
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            {/* Controlled input: value comes from state, onChange
-                updates that state on every keystroke */}
+            {/* Controlled input: value comes from local state so typing
+                is instant; the debounced effect writes it to the URL. */}
             <input
               type="text"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by tuition title, subject or tutor name..."
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
+              placeholder="Search by tuition title, subject, tutor or class..."
               aria-label="Search tuitions"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
@@ -194,7 +242,9 @@ export default function BrowseTuitions() {
               <select
                 id="subject-filter"
                 value={subject}
-                onChange={(event) => setSubject(event.target.value)}
+                onChange={(event) =>
+                  commitParams({ subject: event.target.value })
+                }
                 className={selectClass}
               >
                 {subjectOptions.map((option) => (
@@ -219,7 +269,9 @@ export default function BrowseTuitions() {
               <select
                 id="class-filter"
                 value={classLevel}
-                onChange={(event) => setClassLevel(event.target.value)}
+                onChange={(event) =>
+                  commitParams({ classLevel: event.target.value })
+                }
                 className={selectClass}
               >
                 {classLevelOptions.map((option) => (
@@ -242,7 +294,7 @@ export default function BrowseTuitions() {
               <select
                 id="mode-filter"
                 value={mode}
-                onChange={(event) => setMode(event.target.value)}
+                onChange={(event) => commitParams({ mode: event.target.value })}
                 className={selectClass}
               >
                 {modeOptions.map((option) => (
@@ -257,7 +309,7 @@ export default function BrowseTuitions() {
 
           {/* ---- Bottom row: how many results + Clear button ---- */}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-            {/* Live result counter */}
+            {/* Live result counter — numbers come from the server */}
             <p className="text-sm text-slate-600">
               {isLoading ? (
                 "Loading tuitions…"
@@ -265,9 +317,9 @@ export default function BrowseTuitions() {
                 <>
                   Showing{" "}
                   <span className="font-bold text-slate-900">
-                    {filteredTuitions.length}
+                    {matchedTotal}
                   </span>{" "}
-                  of {tuitions.length} tuitions
+                  of {totalAvailable} tuitions
                 </>
               )}
             </p>
@@ -293,7 +345,7 @@ export default function BrowseTuitions() {
         {isLoading ? (
           /* ---- Still fetching from the API (shared loader) ---- */
           <LoadingSpinner label="Loading tuitions…" />
-        ) : tuitions.length === 0 ? (
+        ) : totalAvailable === 0 ? (
           /* ---- The API has no active tuitions at all ---- */
           <FadeIn className="rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
             <Search className="mx-auto h-10 w-10 text-slate-300" />
@@ -304,7 +356,7 @@ export default function BrowseTuitions() {
               There are no live tuition listings right now — check back soon!
             </p>
           </FadeIn>
-        ) : filteredTuitions.length === 0 ? (
+        ) : visibleTuitions.length === 0 ? (
           /* ---- Empty state: nothing matched the search/filters ---- */
           <FadeIn className="rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
             <Search className="mx-auto h-10 w-10 text-slate-300" />
@@ -326,7 +378,7 @@ export default function BrowseTuitions() {
         ) : (
           /* ---- The grid: 1 column on mobile, 2 on tablet, 3 on desktop ---- */
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredTuitions.map((tuition, index) => (
+            {visibleTuitions.map((tuition, index) => (
               <FadeIn key={tuition.id} delay={index * 0.08} className="h-full">
                 <TuitionCard tuition={tuition} />
               </FadeIn>
