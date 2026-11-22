@@ -2,25 +2,23 @@
 
 ## Project Name
 
-**MentorLagbe** — a full-stack tuition/mentorship marketplace (client application).
+**MentorLagbe** — A full-stack tuition and mentorship marketplace.
+
+This repository contains the **Next.js frontend**. The Express.js + MongoDB backend is maintained separately in the sibling folder `../mentor-lagbe-server`.
+
+**Project:** Programming Hero Assignment 9
 
 ## Purpose
 
-MentorLagbe connects students with tutors. Tutors post tuition listings, students browse and apply for them, and admins review new posts, manage users and view platform payments. This repository is the **Next.js frontend**; the Express + MongoDB backend lives in the sibling folder `../mentor-lagbe-server`. This is Programming Hero Assignment 9.
+MentorLagbe connects students with tutors. Tutors can post tuition listings, students can browse and apply for suitable opportunities, and administrators can review tuition posts, manage users, and monitor platform payments.
 
 ## Live URL
-
-> **Replace before submission:** add your deployed frontend URL here.
 
 ```text
 https://your-mentor-lagbe-domain.vercel.app
 ```
 
-Local development: `http://localhost:3000` (backend: `http://localhost:5000`).
-
 ## Admin Credentials
-
-> **Replace before submission:** add the real admin account created in your database.
 
 | Field    | Value                 |
 | -------- | --------------------- |
@@ -28,59 +26,183 @@ Local development: `http://localhost:3000` (backend: `http://localhost:5000`).
 | Password | `your-admin-password` |
 | Role     | `admin`               |
 
-Sign in at `/sign-in`. The role is read from the database, so an admin is automatically redirected to `/dashboard/admin`. To give an existing user admin access, use the admin-only role change endpoint `PATCH /api/admin/users/:id` (or set `role: "admin"` directly in MongoDB).
+Sign in at `/sign-in`. The role is retrieved from the database, and an admin is redirected to `/dashboard/admin`.
+
+To give an existing user admin access, use the admin-only role change endpoint `PATCH /api/admin/users/:id` or set `role: "admin"` directly in MongoDB.
 
 ## Key Features
 
-- **Role-based authentication** — student, tutor and admin accounts with Better Auth, signed JWT access tokens and role-protected API routes.
-- **Public tuition browsing** — `/tuitions` with server-side search (`q`) and filters for subject, class level and mode; only approved + active posts are visible. Filter state lives in the URL, so results are shareable and survive refresh.
-- **Tuition details** — full post information, tutor details with a “Pro Tutor” badge, apply and bookmark actions.
-- **Tutor dashboard** — post a tuition, manage own posts, view received applicants and see real stats (total posts, live posts, applicants, current plan).
-- **Student dashboard** — overview stats, my applications, saved bookmarks and profile editing.
-- **Admin dashboard** — platform stats, approve/reject pending tuitions, manage users and roles, and view transactions.
-- **Payments** — Stripe Checkout for Pro plans (tutor $15, student $10) with server-side verification plus a signed webhook; duplicate-safe payment records.
-- **Image uploads** — tuition and profile images uploaded through ImgBB.
-- **Responsive UI** — collapsible desktop sidebar with a top bar, mobile drawer, dark/light theme, carousel, animations and toast feedback.
-- **Security** — JWT verified against Better Auth JWKS on the backend, ownership checks on every tutor/student route, and safe whitelisted profile updates.
+- **Role-based authentication** — Student, Tutor, and Admin accounts with Better Auth, signed JWT access tokens, and role-protected API routes.
+- **Public tuition browsing** — `/tuitions` with server-side search (`q`) and filters for subject, class level, and teaching mode. Only approved and active posts are visible. Filter state is stored in the URL, making results shareable and persistent after refresh.
+- **Tuition details** — Full tuition information, tutor details, Pro Tutor badge, application, and bookmark actions.
+- **Tutor dashboard** — Post tuition, manage personal listings, view received applicants, and track statistics such as total posts, active posts, applicants, and current plan.
+- **Student dashboard** — Dashboard overview, application management, saved tuition bookmarks, and profile editing.
+- **Admin dashboard** — Platform statistics, tuition approval and rejection, user and role management, and transaction monitoring.
+- **Payments** — Stripe Checkout for Pro plans (Tutor: $15, Student: $10), with server-side verification, signed webhooks, and duplicate-safe payment records.
+- **Image uploads** — Tuition banner and profile image uploads through ImgBB.
+- **Responsive UI** — Collapsible desktop sidebar, top bar, mobile drawer, dark/light theme, carousel, animations, and toast notifications.
+- **Security** — Backend JWT verification against Better Auth JWKS, ownership checks on tutor/student routes, and whitelisted profile updates.
 
-## npm Packages Used
+## Technology Stack
+
+| Category       | Technologies               |
+| -------------- | -------------------------- |
+| Frontend       | Next.js, React, TypeScript |
+| Backend        | Node.js, Express.js        |
+| Database       | MongoDB                    |
+| Authentication | Better Auth, JWT           |
+| Styling        | Tailwind CSS, HeroUI       |
+| Payment        | Stripe                     |
+| Image Upload   | ImgBB                      |
+| Icons          | Lucide React               |
+| Animations     | Framer Motion              |
+| Notifications  | Toast notifications        |
+
+## NPM Packages Used
 
 ### Dependencies
 
-| Package                                           | Used for                                         |
-| ------------------------------------------------- | ------------------------------------------------ |
-| `next`                                            | React framework, App Router, server components   |
-| `react`, `react-dom`                              | UI runtime                                       |
-| `@heroui/react`, `@heroui/styles`                 | HeroUI v3 component library and styles           |
-| `@base-ui/react`                                  | Headless UI primitives                           |
-| `better-auth`, `@better-auth/mongo-adapter`       | Authentication, sessions and JWT                 |
-| `mongodb`                                         | Database driver (shared with the backend design) |
-| `stripe`, `@stripe/stripe-js`                     | Payment checkout and verification                |
-| `lucide-react`                                    | Icons                                            |
-| `framer-motion`                                   | Animations                                       |
-| `embla-carousel-react`, `embla-carousel-autoplay` | Testimonial carousel                             |
-| `class-variance-authority`, `cn`, `shadcn`        | Styling helpers and UI utilities                 |
-| `tw-animate-css`                                  | Tailwind animation utilities                     |
+| Package                                           | Used for                                           |
+| ------------------------------------------------- | -------------------------------------------------- |
+| `next`                                            | React framework, App Router, and server components |
+| `react`, `react-dom`                              | UI runtime                                         |
+| `@heroui/react`, `@heroui/styles`                 | HeroUI v3 component library and styles             |
+| `@base-ui/react`                                  | Headless UI primitives                             |
+| `better-auth`, `@better-auth/mongo-adapter`       | Authentication, sessions, and JWT                  |
+| `mongodb`                                         | MongoDB database driver                            |
+| `stripe`, `@stripe/stripe-js`                     | Payment checkout and verification                  |
+| `lucide-react`                                    | Icons                                              |
+| `framer-motion`                                   | Animations                                         |
+| `embla-carousel-react`, `embla-carousel-autoplay` | Testimonial carousel                               |
+| `class-variance-authority`, `cn`, `shadcn`        | Styling helpers and UI utilities                   |
+| `tw-animate-css`                                  | Tailwind animation utilities                       |
 
 ### Dev Dependencies
 
-| Package                                                         | Used for                  |
-| --------------------------------------------------------------- | ------------------------- |
-| `typescript`, `@types/node`, `@types/react`, `@types/react-dom` | Type checking and types   |
-| `tailwindcss`, `@tailwindcss/turbopack`                         | CSS styling (Tailwind v4) |
-| `eslint`, `eslint-config-next`                                  | Linting                   |
-| `babel-plugin-react-compiler`                                   | React Compiler support    |
+| Package                                                         | Used for                                 |
+| --------------------------------------------------------------- | ---------------------------------------- |
+| `typescript`, `@types/node`, `@types/react`, `@types/react-dom` | Type checking and TypeScript definitions |
+| `tailwindcss`, `@tailwindcss/turbopack`                         | CSS styling (Tailwind CSS v4)            |
+| `eslint`, `eslint-config-next`                                  | Code linting                             |
+| `babel-plugin-react-compiler`                                   | React Compiler support                   |
 
-## Quick Start
+## Run Locally
+
+Follow these steps to run the complete MentorLagbe application on your local machine.
+
+### Prerequisites
+
+Make sure you have installed:
+
+- Node.js (LTS version recommended)
+- npm
+- MongoDB Atlas account or a local MongoDB instance
+- Git
+
+### 1. Clone the Frontend Repository
+
+```bash
+git clone YOUR_CLIENT_REPOSITORY_URL
+cd YOUR_CLIENT_FOLDER
+```
+
+### 2. Install Frontend Dependencies
 
 ```bash
 npm install
+```
+
+### 3. Configure Frontend Environment Variables
+
+Create a `.env.local` file in the frontend root directory.
+
+Add the required environment variables:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
+
+Add any other environment variables required by your frontend configuration, such as Better Auth settings.
+
+> Never expose secret keys through variables prefixed with `NEXT_PUBLIC_`.
+
+### 4. Clone the Backend Repository
+
+Open another terminal and clone the Express backend repository:
+
+```bash
+git clone YOUR_SERVER_REPOSITORY_URL
+cd YOUR_SERVER_FOLDER
+```
+
+### 5. Install Backend Dependencies
+
+```bash
+npm install
+```
+
+### 6. Configure Backend Environment Variables
+
+Create a `.env` file in the backend root directory.
+
+Configure the required backend environment variables, including:
+
+- MongoDB connection URI
+- Better Auth secret and configuration
+- Client URL and CORS configuration
+- ImgBB API key
+- Stripe secret key
+- Stripe webhook secret
+- Any additional JWT or authentication configuration used by the backend
+
+Use `.env.example` as a reference if provided. Never commit real credentials or secret keys to GitHub.
+
+### 7. Start the Backend Server
+
+Run the backend development command:
+
+```bash
 npm run dev
 ```
 
-Then open `http://localhost:3000`. The backend must be running on port `5000` and `NEXT_PUBLIC_API_URL` must point to it.
+The backend should be available at:
 
-Useful checks:
+```text
+http://localhost:5000
+```
+
+### 8. Start the Frontend Application
+
+In a separate terminal, navigate to the frontend project directory and run:
+
+```bash
+npm run dev
+```
+
+The frontend should be available at:
+
+```text
+http://localhost:3000
+```
+
+Open the application in your browser:
+
+**http://localhost:3000**
+
+> Make sure the backend is running and `NEXT_PUBLIC_API_URL` points to the correct backend URL before using the application.
+
+## Available Scripts
+
+Run these commands from the frontend project directory:
+
+| Command         | Description                      |
+| --------------- | -------------------------------- |
+| `npm run dev`   | Start the development server     |
+| `npm run build` | Build the production application |
+| `npm run start` | Start the production server      |
+| `npm run lint`  | Run ESLint                       |
+
+### Useful Checks
 
 ```bash
 npx tsc --noEmit
@@ -88,7 +210,17 @@ npm run lint
 npm run build
 ```
 
+## Environment Variable Security
+
+- Keep frontend local environment variables in `.env.local`.
+- Keep backend secrets in the backend `.env` file.
+- Add `.env`, `.env.local`, and other secret files to `.gitignore`.
+- Never push database credentials, API keys, authentication secrets, or Stripe secret keys to GitHub.
+- Provide `.env.example` files with placeholder values for other developers.
+
 ---
+
+## **MentorLagbe — Connecting Students with the Right Mentors.**
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 

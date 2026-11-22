@@ -11,8 +11,7 @@ import { studentSections } from "@/components/dashboard/studentData";
 import { adminSections } from "@/components/dashboard/adminData";
 import { authClient } from "@/lib/auth-client";
 import { uploadToImgBB } from "@/lib/imgbb";
-import { updateProfile, type ProfileForm } from "@/lib/api/profile";
-
+import { type ProfileForm } from "@/lib/api/profile";
 
 const basicSections: DashboardSection[] = [
   { name: "Update Profile", href: "/dashboard/profile", icon: UserCog },
@@ -39,6 +38,19 @@ export default function UpdateProfile() {
 
   const update = (key: keyof ProfileForm, value: string) =>
     setForm({ ...current, [key]: value });
+
+  if (!form && session?.user) {
+    const user = session.user as typeof session.user & {
+      phone?: string;
+      bio?: string;
+    };
+    setForm({
+      name: user.name ?? "",
+      phone: user.phone ?? "",
+      bio: user.bio ?? "",
+      image: user.image ?? "",
+    });
+  }
 
   useEffect(() => {
     return () => {
@@ -77,24 +89,32 @@ export default function UpdateProfile() {
         image = await uploadToImgBB(newFile);
       }
 
-      const result = await updateProfile({
-        name: current.name.trim(),
-        phone: current.phone.trim(),
-        bio: current.bio.trim(),
+      const cleanName = current.name.trim();
+      const cleanPhone = current.phone.trim();
+      const cleanBio = current.bio.trim();
+
+      const { error } = await authClient.updateUser({
+        name: cleanName,
+        phone: cleanPhone,
+        bio: cleanBio,
         image,
       });
 
+      if (error) {
+        throw new Error(error.message || "Could not update profile");
+      }
+
       setForm({
-        name: result.profile.name,
-        phone: result.profile.phone,
-        bio: result.profile.bio,
-        image: result.profile.image,
+        name: cleanName,
+        phone: cleanPhone,
+        bio: cleanBio,
+        image,
       });
       setNewFile(null);
 
-      toast.success(result.message || "Profile updated");
-
       await refetch();
+
+      toast.success("Profile updated");
     } catch (err) {
       toast.warning(
         err instanceof Error ? err.message : "Could not update profile",
