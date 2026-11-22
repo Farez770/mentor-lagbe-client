@@ -12,6 +12,7 @@ import { adminSections } from "@/components/dashboard/adminData";
 import { authClient } from "@/lib/auth-client";
 import { uploadToImgBB } from "@/lib/imgbb";
 import { type ProfileForm } from "@/lib/api/profile";
+import Image from "next/image";
 
 const basicSections: DashboardSection[] = [
   { name: "Update Profile", href: "/dashboard/profile", icon: UserCog },
@@ -39,18 +40,18 @@ export default function UpdateProfile() {
   const update = (key: keyof ProfileForm, value: string) =>
     setForm({ ...current, [key]: value });
 
-  if (!form && session?.user) {
-    const user = session.user as typeof session.user & {
-      phone?: string;
-      bio?: string;
-    };
-    setForm({
-      name: user.name ?? "",
-      phone: user.phone ?? "",
-      bio: user.bio ?? "",
-      image: user.image ?? "",
-    });
-  }
+  // if (!form && session?.user) {
+  //   const user = session.user as typeof session.user & {
+  //     phone?: string;
+  //     bio?: string;
+  //   };
+  //   setForm({
+  //     name: user.name ?? "",
+  //     phone: user.phone ?? "",
+  //     bio: user.bio ?? "",
+  //     image: user.image ?? "",
+  //   });
+  // }
 
   useEffect(() => {
     return () => {
@@ -160,10 +161,12 @@ export default function UpdateProfile() {
           <div className="rounded-2xl bg-white p-5 shadow-lg ring-1 ring-emerald-950/5 sm:p-7">
             <div className="flex flex-wrap items-center gap-4">
               {shownImage ? (
-                <img
+                <Image
                   src={shownImage}
                   alt="Profile picture preview"
                   className="h-20 w-20 shrink-0 rounded-full object-cover ring-2 ring-emerald-100"
+                  width={80}
+                  height={80}
                 />
               ) : (
                 <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-2xl font-extrabold text-emerald-700">

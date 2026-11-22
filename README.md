@@ -15,16 +15,16 @@ MentorLagbe connects students with tutors. Tutors can post tuition listings, stu
 ## Live URL
 
 ```text
-https://your-mentor-lagbe-domain.vercel.app
+https://mentor-lagbe-client-jade.vercel.app/
 ```
 
 ## Admin Credentials
 
-| Field    | Value                 |
-| -------- | --------------------- |
-| Email    | `admin@example.com`   |
-| Password | `your-admin-password` |
-| Role     | `admin`               |
+| Field    | Value            |
+| -------- | ---------------- |
+| Email    | `admin@one.com`  |
+| Password | `Admin1@one.com` |
+| Role     | `admin`          |
 
 Sign in at `/sign-in`. The role is retrieved from the database, and an admin is redirected to `/dashboard/admin`.
 
@@ -102,8 +102,8 @@ Make sure you have installed:
 ### 1. Clone the Frontend Repository
 
 ```bash
-git clone YOUR_CLIENT_REPOSITORY_URL
-cd YOUR_CLIENT_FOLDER
+git clone https://github.com/Farez770/mentor-lagbe-client.git
+cd mentor-lagbe-client
 ```
 
 ### 2. Install Frontend Dependencies
@@ -124,15 +124,13 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 
 Add any other environment variables required by your frontend configuration, such as Better Auth settings.
 
-> Never expose secret keys through variables prefixed with `NEXT_PUBLIC_`.
-
 ### 4. Clone the Backend Repository
 
 Open another terminal and clone the Express backend repository:
 
 ```bash
-git clone YOUR_SERVER_REPOSITORY_URL
-cd YOUR_SERVER_FOLDER
+git clone https://github.com/Farez770/mentor-lagbe-server.git
+cd mentor-lagbe-server
 ```
 
 ### 5. Install Backend Dependencies
