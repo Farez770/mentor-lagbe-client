@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GraduationCap, Mail, Phone, MapPin } from "lucide-react";
 
-// Quick links shown in the footer
 const quickLinks = [
   { name: "Home", href: "/" },
   { name: "Browse Tuitions", href: "/tuitions" },
@@ -14,15 +13,12 @@ const quickLinks = [
 ];
 
 export default function Footer() {
-  // Same rule as the Navbar: dashboard pages show NO site footer.
-  // Keyed to the active route (see the note in globals.css).
   const pathname = usePathname();
   if (pathname.startsWith("/dashboard")) return null;
 
   return (
     <footer className="bg-slate-900 text-slate-300">
       <div className="max-w-7xl mx-auto px-4 py-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Brand + tagline */}
         <div>
           <Link href="/" className="flex items-center gap-2 mb-4">
             <span className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center">
@@ -37,8 +33,6 @@ export default function Footer() {
             join subject-wise batches, and book 1-on-1 mentorship sessions.
           </p>
 
-          {/* Social media icons (X is the new logo, not the old bird).
-              Real platform URLs replace the old "#" placeholders. */}
           <div className="flex gap-3 mt-5">
             <a
               href="https://www.facebook.com/"
@@ -62,7 +56,6 @@ export default function Footer() {
                 <path d="M21.6 7.2a2.7 2.7 0 0 0-1.9-1.9C18 4.8 12 4.8 12 4.8s-6 0-7.7.5A2.7 2.7 0 0 0 2.4 7.2 28 28 0 0 0 2 12a28 28 0 0 0 .4 4.8 2.7 2.7 0 0 0 1.9 1.9c1.7.5 7.7.5 7.7.5s6 0 7.7-.5a2.7 2.7 0 0 0 1.9-1.9A28 28 0 0 0 22 12a28 28 0 0 0-.4-4.8zM10 15.2V8.8L15.5 12 10 15.2z" />
               </svg>
             </a>
-            {/* New X logo */}
             <a
               href="https://x.com/"
               target="_blank"
@@ -88,7 +81,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Quick links */}
         <div>
           <h3 className="text-white font-bold text-lg mb-4">Quick Links</h3>
           <ul className="space-y-3 text-sm">
@@ -105,7 +97,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Contact info */}
         <div>
           <h3 className="text-white font-bold text-lg mb-4">Contact Info</h3>
           <ul className="space-y-3 text-sm">
@@ -124,7 +115,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Working hours / small info card */}
         <div>
           <h3 className="text-white font-bold text-lg mb-4">Support Hours</h3>
           <ul className="space-y-3 text-sm text-slate-400">
@@ -137,7 +127,6 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Copyright bar */}
       <div className="border-t border-slate-800">
         <p className="max-w-7xl mx-auto px-4 py-5 text-center text-sm text-slate-500">
           &copy; 2026 MentorLagbe. All rights reserved.

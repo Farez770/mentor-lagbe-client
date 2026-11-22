@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-// Custom 404 — shown when a page/tuition URL does not exist.
 export default function NotFound() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 text-center">

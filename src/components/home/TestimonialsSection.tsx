@@ -12,13 +12,6 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-// ============================================================
-// Editorial testimonials are intentionally static. The project's
-// database design has exactly 4 collections (users, tuitions,
-// applications, payments), so a separate reviews collection or
-// API is deliberately not part of this app. These sample quotes
-// keep the landing page rich without changing that data design.
-// ============================================================
 const testimonials = [
   {
     name: "Ayesha Siddika",
@@ -60,8 +53,6 @@ export default function TestimonialsSection() {
           description="Real feedback from students and tutors who found each other through MentorLagbe."
         />
 
-        {/* Review carousel — 1 card on mobile, 2 on tablet, 3 on desktop.
-            Autoplay slides it automatically every 4 seconds (infinite loop). */}
         <FadeIn delay={0.15}>
           <Carousel
             opts={{ align: "start", loop: true }}
@@ -81,7 +72,6 @@ export default function TestimonialsSection() {
                   className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
                 >
                   <div className="flex flex-col h-full bg-slate-50 border border-slate-200 rounded-2xl p-6 md:p-7 hover:shadow-lg transition-shadow">
-                    {/* Stars */}
                     <div className="flex gap-1 mb-4">
                       {Array.from({ length: 5 }).map((_, index) => (
                         <Star
@@ -99,7 +89,6 @@ export default function TestimonialsSection() {
                       {item.text}
                     </p>
 
-                    {/* Person row at the bottom */}
                     <div className="flex items-center gap-3 mt-6 pt-5 border-t border-slate-200">
                       <img
                         src={item.image}
@@ -118,14 +107,11 @@ export default function TestimonialsSection() {
               ))}
             </CarouselContent>
 
-            {/* Prev / next arrows (hidden on mobile — users swipe there).
-                Bigger size + green background on hover and click. */}
             <CarouselPrevious className="hidden sm:flex size-11 cursor-pointer border-2 border-emerald-500 bg-white text-emerald-600 transition-colors duration-200 hover:border-emerald-600 hover:bg-emerald-600 hover:text-white active:border-emerald-700 active:bg-emerald-700 active:text-white focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2" />
             <CarouselNext className="hidden sm:flex cursor-pointer size-11 border-2 border-emerald-500 bg-white text-emerald-600 transition-colors duration-200 hover:border-emerald-600 hover:bg-emerald-600 hover:text-white active:border-emerald-700 active:bg-emerald-700 active:text-white focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2" />
           </Carousel>
         </FadeIn>
 
-        {/* Small hint for mobile users */}
         <p className="text-center text-xs text-slate-500 mt-6 sm:hidden">
           Swipe to see more reviews
         </p>

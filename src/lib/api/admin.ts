@@ -1,42 +1,31 @@
 import { apiFetch } from "./client";
 
-// ============================================================
-// Numbers behind the 4 admin Overview cards
-// ============================================================
 export type AdminStats = {
-  totalUsers: number; // Total Users
-  totalTutors: number; // Total Tutors
-  pendingTuitions: number; // ┐ Pending vs. Approved
-  approvedTuitions: number; // ┘ Tuitions
-  totalRevenue: number; // Total Stripe Revenue (৳)
+  totalUsers: number;
+  totalTutors: number;
+  pendingTuitions: number;
+  approvedTuitions: number;
+  totalRevenue: number;
 };
 
-// GET /api/admin/stats — platform statistics
-// (login required, admin role — everyone else gets a 403)
 export function getAdminStats() {
   return apiFetch<{ stats: AdminStats }>("/api/admin/stats");
 }
 
-// ============================================================
-// One row of the User Management list
-// ============================================================
 export type AdminUser = {
-  id: string; // Mongo _id as a string (used in the PATCH url)
+  id: string;
   name: string;
   email: string;
-  image: string; // "" when the user has no photo
-  role: "student" | "tutor" | "admin"; // the three manageable roles
-  plan: string; // "free" | "pro"
-  createdAt: string | null; // ISO date of signing up
+  image: string;
+  role: "student" | "tutor" | "admin";
+  plan: string;
+  createdAt: string | null;
 };
 
-// GET /api/admin/users — every registered user (admin role)
 export function getAllUsers() {
   return apiFetch<{ users: AdminUser[] }>("/api/admin/users");
 }
 
-// PATCH /api/admin/users/:id — change one user's role.
-// The server blocks non-admins (403) and self-changes (400).
 export function updateUserRole(
   id: string,
   role: "student" | "tutor" | "admin",
@@ -50,9 +39,6 @@ export function updateUserRole(
   );
 }
 
-// ============================================================
-// One tuition post on the approval page
-// ============================================================
 export type AdminTuition = {
   id: string; // Mongo _id as a string (used in the PATCH url + links)
   title: string;
@@ -73,13 +59,10 @@ export type AdminTuition = {
   createdAt: string | null; // ISO date the tutor submitted it
 };
 
-// GET /api/admin/tuitions — every tuition post (admin role)
 export function getAllTuitions() {
   return apiFetch<{ tuitions: AdminTuition[] }>("/api/admin/tuitions");
 }
 
-// PATCH /api/admin/tuitions/:id — approve or reject one post.
-// The server blocks non-admins (403) and unknown posts (404).
 export function setTuitionApproval(
   id: string,
   approvalStatus: "approved" | "rejected",
@@ -93,10 +76,6 @@ export function setTuitionApproval(
   });
 }
 
-// ============================================================
-// One row of the Transaction Management list
-// (a verified Stripe payment from the "payments" collection)
-// ============================================================
 export type AdminTransaction = {
   id: string; // Mongo _id as a string (React row key)
   userName: string; // joined from users ("(deleted user)" if gone)
@@ -110,8 +89,6 @@ export type AdminTransaction = {
   status: string; // "paid"
 };
 
-// GET /api/admin/transactions — every payment (admin role).
-// The server blocks non-admins with a 403.
 export function getAllTransactions() {
   return apiFetch<{ transactions: AdminTransaction[] }>(
     "/api/admin/transactions",

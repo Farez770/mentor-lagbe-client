@@ -1,13 +1,10 @@
 "use client";
 
-// "use client" is needed because this page passes icon
-// COMPONENTS (functions) to DashboardDrawer, and only client
-// components may receive functions as props.
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Modal, toast } from "@heroui/react";
 import { Ban, CalendarDays, Mail, Plus, Send, User } from "lucide-react";
-import { LoadingSpinner } from "@/components/shared/Loading"; // shared loader
+import { LoadingSpinner } from "@/components/shared/Loading";
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
 import {
   demoStudent,
@@ -18,54 +15,26 @@ import {
   cancelApplication,
   type MyApplication,
 } from "@/lib/api/applications";
-// ★ COMMENTED OUT (2026-11-21): only needed by the disabled
-//   priority-booking banner (see below) — uncomment together.
-// import { authClient } from "@/lib/auth-client";
 
-// ============================================================
-// MY APPLICATIONS page (/dashboard/student/my-applications)
-//
-// Project requirement — show every tuition the student applied
-// for (Tuition Title, Tutor Name & Email, Monthly Fee, Applied
-// Date, Status Badge) and let them CANCEL an application while
-// its status is still "pending".
-//
-// Everything comes from GET /api/applications/mine — no demo
-// data anywhere on this page.
-// ============================================================
 
-// Status badge colors (same palette as the tutor's inbox)
 const statusStyles: Record<string, string> = {
   pending: "bg-amber-100 text-amber-700",
   accepted: "bg-emerald-100 text-emerald-700",
   rejected: "bg-rose-100 text-rose-700",
 };
 
-// "pending" -> "Pending"
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export default function MyApplications() {
-  // null = still loading the list
   const [applications, setApplications] = useState<MyApplication[] | null>(
     null,
   );
   const [loadError, setLoadError] = useState(false);
-  // id of the application whose Cancel request is running
   const [busyId, setBusyId] = useState<string | null>(null);
-  // which application the confirm modal is open for (null = closed)
   const [cancelTarget, setCancelTarget] = useState<MyApplication | null>(null);
 
-  // ★ REQUIREMENT UPDATE (2026-11-21): the PRIORITY BOOKING
-  //   session flag is DISABLED — the Pro student benefit is now
-  //   "unlimited bookmarks" (see lib/api/bookmarks.ts), so this
-  //   page no longer needs to know my plan. Uncomment both
-  //   lines together with the banner below if it returns.
-  // const { data: session } = authClient.useSession();
-  // const isPro = String(session?.user?.plan ?? "free").toLowerCase() === "pro";
 
-  // ---------- load MY applications once ----------
   useEffect(() => {
-    // "alive" = ignore the answer if the page was left first
     let alive = true;
 
     getMyApplications()
@@ -84,29 +53,20 @@ export default function MyApplications() {
     return () => {
       alive = false;
     };
-  }, []); // [] = run once when the page opens
+  }, []);
 
-  // ------------------------------------------------------------
-  // Cancel (step 1): clicking Cancel only OPENS the HeroUI
-  // confirm modal — nothing is cancelled at this point.
-  // ------------------------------------------------------------
   const onCancel = (app: MyApplication) => {
     setCancelTarget(app);
   };
 
-  // ------------------------------------------------------------
-  // Cancel (step 2): the user confirmed INSIDE the modal
-  // -> close the modal, call the API, drop it from the list.
-  // ------------------------------------------------------------
   const confirmCancel = async () => {
     if (!cancelTarget) return;
     const app = cancelTarget;
-    setCancelTarget(null); // close the modal right away
+    setCancelTarget(null);
 
     setBusyId(app.id);
     try {
       const result = await cancelApplication(app.id);
-      // drop the cancelled application from the list
       setApplications((list) => (list ?? []).filter((x) => x.id !== app.id));
       toast.success(result.message || "Application cancelled");
     } catch (err) {
@@ -118,7 +78,6 @@ export default function MyApplications() {
     }
   };
 
-  // friendly date, e.g. "19 Nov 2026" (same as the tutor inbox)
   const appliedOn = (iso: string) =>
     new Date(iso).toLocaleDateString("en-GB", {
       day: "numeric",
@@ -126,16 +85,11 @@ export default function MyApplications() {
       year: "numeric",
     });
 
-  // ============================================================
-  // Render
-  // ============================================================
   return (
     <section className="bg-slate-50 pb-6">
       <DashboardDrawer
         title="Student Dashboard"
         sections={studentSections}
-        // Fallback user while the session loads — the drawer
-        // swaps in the REAL logged-in student automatically.
         user={{
           name: demoStudent.name,
           role: "Student",
@@ -143,7 +97,6 @@ export default function MyApplications() {
         }}
       >
         <div className="mx-auto mt-12 max-w-5xl px-4">
-          {/* ---------- Page heading ---------- */}
           <div className="mb-5 flex justify-between">
             <div>
               <p className="text-xs font-bold tracking-widest text-emerald-700">
@@ -163,18 +116,6 @@ export default function MyApplications() {
                   {applications.length === 1 ? "application" : "applications"}
                 </p>
               )}
-              {/* ★ REQUIREMENT UPDATE (2026-11-21): the Pro
-                  "priority booking" banner is DISABLED — the Pro
-                  student benefit is now "unlimited bookmarks"
-                  (see lib/api/bookmarks.ts). The isPro flag below
-                  is kept commented out for the same reason.
-              {isPro && (
-                <p className="mt-2 inline-block rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-200">
-                  ⭐ Pro plan: your applications appear first in tutors&apos;
-                  applicant lists
-                </p>
-              )}
-              */}
             </div>
             <div className="flex justify-center items-center">
               <Link
@@ -189,9 +130,6 @@ export default function MyApplications() {
             </div>
           </div>
 
-          {/* ==================================================
-              1) ERROR — API not reachable
-              ================================================== */}
           {loadError ? (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-14 text-center">
               <Send className="mx-auto h-9 w-9 text-slate-300" />
@@ -211,10 +149,8 @@ export default function MyApplications() {
               </button>
             </div>
           ) : applications === null ? (
-            /* ---------- 2) LOADING (shared loader) ---------- */
             <LoadingSpinner label="Loading your applications…" />
           ) : applications.length === 0 ? (
-            /* ---------- 3) EMPTY ---------- */
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-14 text-center">
               <Send className="mx-auto h-9 w-9 text-slate-300" />
               <h2 className="mt-3 text-lg font-bold text-slate-900">
@@ -232,17 +168,14 @@ export default function MyApplications() {
               </Link>
             </div>
           ) : (
-            /* ---------- 4) THE LIST (card grid) ---------- */
             <ul className="space-y-4">
               {applications.map((app) => (
                 <li
                   key={app.id}
                   className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-emerald-950/5 sm:p-5"
                 >
-                  {/* tuition title + status badge */}
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      {/* icon avatar (applications store no photo) */}
                       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
                         <Send size={18} />
                       </span>
@@ -270,7 +203,6 @@ export default function MyApplications() {
                     </span>
                   </div>
 
-                  {/* tutor name · tutor email · monthly fee */}
                   <div className="mt-3 grid gap-1.5 text-sm text-gray-700 sm:grid-cols-2">
                     <p className="flex items-center gap-2 break-all">
                       <User size={14} className="shrink-0 text-emerald-600" />
@@ -287,7 +219,6 @@ export default function MyApplications() {
                       />
                       Monthly fee:{" "}
                       {app.fee === null ? (
-                        /* the tuition was deleted — no fee to show */
                         <span className="text-gray-400">—</span>
                       ) : (
                         <span className="font-semibold text-emerald-700">
@@ -301,7 +232,6 @@ export default function MyApplications() {
                     </p>
                   </div>
 
-                  {/* ---------- Cancel (pending only) ---------- */}
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     {app.status === "pending" ? (
                       <button
@@ -335,13 +265,6 @@ export default function MyApplications() {
             </ul>
           )}
 
-          {/* ==================================================
-              CANCEL CONFIRM MODAL (HeroUI)
-              Opens from the Cancel button on any card. The
-              application is only cancelled after the user
-              confirms here — Esc, a backdrop click or "Keep
-              Application" all abort.
-              ================================================== */}
           <Modal
             isOpen={cancelTarget !== null}
             onOpenChange={(open) => {

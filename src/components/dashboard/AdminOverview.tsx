@@ -1,50 +1,23 @@
 "use client";
 
-// "use client" is needed because this page passes icon
-// COMPONENTS (functions) to DashboardDrawer, and only client
-// components may receive functions as props.
 import { ClipboardList, CreditCard, GraduationCap, Users } from "lucide-react";
-import { StatCardsSkeleton } from "@/components/shared/Loading"; // skeleton cards while stats load
+import { StatCardsSkeleton } from "@/components/shared/Loading";
 import { useEffect, useState } from "react";
 import StatCard from "@/components/dashboard/StatCard";
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
-// The sidebar sections + demo admin are shared with the other
-// admin pages — see adminData.ts
 import { adminSections, demoAdmin } from "@/components/dashboard/adminData";
 import { authClient } from "@/lib/auth-client";
 import { getAdminStats, type AdminStats } from "@/lib/api/admin";
 
-// ============================================================
-// ADMIN DASHBOARD — Overview page (/dashboard/admin)
-//
-// Project requirement — 4 reusable stats cards:
-//   1. Total Users                 -> GET /api/admin/stats
-//   2. Total Tutors                -> GET /api/admin/stats
-//   3. Pending vs. Approved Tuitions -> GET /api/admin/stats
-//   4. Total Stripe Revenue        -> GET /api/admin/stats
-//
-// The API only answers admins (403 for everyone else), so a
-// non-admin sees the error card below instead of fake numbers.
-// ============================================================
 export default function AdminOverview() {
-  // ============================================================
-  // THE REAL LOGGED-IN USER (BetterAuth session)
-  // ============================================================
   const { data: session } = authClient.useSession();
   const displayName = session?.user?.name ?? demoAdmin.name;
   const displayImage = session?.user?.image || undefined;
 
-  // ============================================================
-  // THE REAL NUMBERS (GET /api/admin/stats).
-  // null = still loading -> the cards show "…".
-  // loadError = the server said no (403 for non-admins, API
-  // down, ...) -> we show an error card, never fake data.
-  // ============================================================
   const [statsData, setStatsData] = useState<AdminStats | null>(null);
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    // "alive" = ignore the answer if the page was left first
     let alive = true;
 
     getAdminStats()
@@ -60,20 +33,17 @@ export default function AdminOverview() {
         setStatsData(null);
       });
 
-    // cleanup: never set state after unmount
     return () => {
       alive = false;
     };
-  }, []); // [] = run once when the page opens
+  }, []);
 
-  // Shortcuts to the loaded numbers (undefined while loading)
   const totalUsers = statsData?.totalUsers;
   const totalTutors = statsData?.totalTutors;
   const pending = statsData?.pendingTuitions;
   const approved = statsData?.approvedTuitions;
   const revenue = statsData?.totalRevenue;
 
-  // The 4 cards required by the requirement, from REAL numbers
   const stats = [
     {
       id: 1,
@@ -106,21 +76,17 @@ export default function AdminOverview() {
     {
       id: 3,
       label: "Pending vs. Approved",
-      // e.g. "3 / 12" — pending first, approved second
       value: pending === undefined ? "…" : `${pending} / ${approved}`,
       sub:
         pending === undefined
           ? "Loading platform stats…"
           : "pending / approved tuitions",
-      // amber dot = something is waiting for approval
       dot: pending ? "bg-amber-500" : "bg-slate-400",
       accent: "amber" as const,
       icon: ClipboardList,
     },
     {
       id: 4,
-      // Stripe charges in USD ($10 / $15 cards) — value is in
-      // whole dollars, exactly what /api/payments/verify stores
       label: "Total Stripe Revenue",
       value: revenue === undefined ? "…" : `$${revenue.toLocaleString()}`,
       sub:
@@ -136,21 +102,10 @@ export default function AdminOverview() {
   ];
 
   return (
-    // No top padding — the content starts flush at the very
-    // top of the right column. pb-6 only leaves a little
-    // breathing room at the bottom when you scroll to the end.
     <section className="bg-slate-50 pb-6">
-      {/* ====================================================
-          DashboardDrawer = the dashboard SHELL (sidebar + the
-          only scrollable area). On dashboard pages the site
-          navbar and footer are hidden (Navbar/Footer return
-          null on /dashboard/*), so the shell fills the screen.
-          ==================================================== */}
       <DashboardDrawer
         title="Admin Dashboard"
         sections={adminSections}
-        // Fallback user shown for a moment while the session
-        // loads — the drawer swaps in the REAL logged-in admin.
         user={{
           name: demoAdmin.name,
           role: "Admin",
@@ -158,18 +113,12 @@ export default function AdminOverview() {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 mt-12">
-          {/* ====================================================
-              WELCOME HEADER (same green banner as the other
-              dashboard overviews)
-              ==================================================== */}
           <div className="rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white shadow-lg">
             <div className="flex flex-wrap items-center justify-between gap-6 px-7">
-              {/* Greeting text */}
               <div>
                 <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-xs font-semibold tracking-wide">
                   Admin Dashboard
                 </span>
-                {/* Real name from the session (demo until it loads) */}
                 <h1 className="mt-3 text-2xl md:text-3xl font-extrabold">
                   Welcome back, {displayName}! 👋
                 </h1>
@@ -178,9 +127,7 @@ export default function AdminOverview() {
                 </p>
               </div>
 
-              {/* Real profile photo — falls back to the first letter */}
               {displayImage ? (
-                // eslint-disable-next-line @next/next/no-img-element -- profile photos can come from any domain
                 <img
                   src={displayImage}
                   alt={displayName}
@@ -194,9 +141,6 @@ export default function AdminOverview() {
             </div>
           </div>
 
-          {/* ====================================================
-              1) ERROR — not an admin (403), or API not reachable
-              ==================================================== */}
           {loadError ? (
             <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white py-14 text-center">
               <Users className="mx-auto h-9 w-9 text-slate-300" />
@@ -217,15 +161,10 @@ export default function AdminOverview() {
               </button>
             </div>
           ) : !statsData ? (
-            /* Skeleton cards while GET /api/admin/stats loads */
             <div className="mt-6">
               <StatCardsSkeleton />
             </div>
           ) : (
-            /* ====================================================
-                2) STATS GRID — the 4 required cards.
-                1 column on mobile, 2 on tablet, 4 on desktop.
-                ==================================================== */
             <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
               {stats.map((stat) => (
                 <StatCard

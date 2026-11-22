@@ -24,71 +24,49 @@ import {
 } from "@/lib/api/tuitions";
 import { uploadToImgBB } from "@/lib/imgbb";
 
-// ============================================================
-// TUITION EDIT FORM (used inside the My Tuitions page)
-//
-// Same fields as Post a Tuition, but:
-//   - the form STARTS with the tuition's current values
-//   - the banner image is OPTIONAL (keeps the old one unless
-//     you pick a new file)
-//   - Save Changes -> PATCH /api/tuitions/:id
-//   - Cancel       -> parent switches back to the card view
-// ============================================================
 
-// The props the parent (MyTuitions) passes in
 type Props = {
-  tuition: PostedTuition; // the post being edited
-  onSaved: (updated: PostedTuition) => void; // parent updates its list
-  onCancel: () => void; // parent hides the form
+  tuition: PostedTuition;
+  onSaved: (updated: PostedTuition) => void;
+  onCancel: () => void;
 };
 
 export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
-  // ---------- form state: starts with the CURRENT values ----------
   const [form, setForm] = useState({
     title: tuition.title,
     subject: tuition.subject,
     classLevel: tuition.classLevel,
     mode: tuition.mode,
     location: tuition.location,
-    fee: String(tuition.fee), // stored as text while typing
-    days: String(tuition.days), // stored as text for the dropdown
+    fee: String(tuition.fee),
+    days: String(tuition.days),
     description: tuition.description,
   });
 
-  // a NEW banner file — only set if the tutor picks another image
   const [bannerFile, setBannerFile] = useState<File | null>(null);
-  // local preview of that new file (null = show the old banner)
   const [preview, setPreview] = useState<string | null>(null);
 
   const [isPending, setIsPending] = useState(false);
 
-  // free the object URL whenever the preview changes / unmounts
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview);
     };
   }, [preview]);
 
-  // update ONE field of the form
   const update = (key: keyof typeof form, value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
 
-  // when the tutor picks a new banner file -> keep it + preview
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setBannerFile(file);
-    setPreview(URL.createObjectURL(file)); // local blob preview
+    setPreview(URL.createObjectURL(file));
   };
 
-  // ------------------------------------------------------------
-  // Submit: validate -> (upload only if a new image) -> PATCH
-  // ------------------------------------------------------------
   const onSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // ---------- 1) validate everything first ----------
-    // (the same rules as creating a tuition)
     const errors: string[] = [];
 
     if (form.title.trim().length < 5) {
@@ -117,28 +95,22 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
     if (form.description.trim().length < 20) {
       errors.push("Description must be at least 20 characters");
     }
-    // banner: only required when the tuition somehow has none
     if (!bannerFile && !tuition.image) {
       errors.push("Please select a banner image");
     }
 
     if (errors.length > 0) {
-      toast.warning(errors[0]); // show the first problem
+      toast.warning(errors[0]);
       return;
     }
 
     setIsPending(true);
 
     try {
-      // ---------- 2) upload a new banner ONLY if one was picked ----------
-      // otherwise the old ImgBB URL stays as it is
       const image = bannerFile
         ? await uploadToImgBB(bannerFile)
         : tuition.image;
 
-      // ---------- 3) save through OUR API ----------
-      // (★ JWT: the signed token is attached inside apiFetch;
-      //  the server checks ownership + the same rules)
       const payload: CreateTuitionInput = {
         title: form.title.trim(),
         subject: form.subject.trim(),
@@ -154,9 +126,8 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
       const result = await updateTuition(tuition.id, payload);
 
       toast.success(result.message || "Tuition updated!");
-      onSaved(result.tuition); // parent swaps the form back to the card
+      onSaved(result.tuition);
     } catch (err) {
-      // Shows the SERVER's message (e.g. validation or 403)
       toast.warning(
         err instanceof Error ? err.message : "Something went wrong",
       );
@@ -165,13 +136,11 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
     }
   };
 
-  // Same input styles as Post a Tuition
   const inputClass =
     "h-10 w-full rounded-lg border border-emerald-300 bg-white px-3 text-sm text-gray-800 shadow-sm outline-none transition-all placeholder:text-gray-500 hover:border-emerald-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100";
 
   return (
     <div className="rounded-2xl bg-white p-5 shadow-lg ring-1 ring-emerald-950/5 sm:p-7">
-      {/* ---------- Small heading ---------- */}
       <div className="mb-4">
         <p className="text-xs font-bold tracking-widest text-emerald-700">
           EDIT TUITION
@@ -185,9 +154,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
         </p>
       </div>
 
-      {/* ====================================================
-          THE FORM (same structure as Post a Tuition)
-          ==================================================== */}
       <Form className="w-full" onSubmit={onSubmit}>
         <Fieldset className="w-full">
           <Fieldset.Legend className="sr-only">Edit tuition</Fieldset.Legend>
@@ -196,7 +162,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
             className="grid gap-3 md:grid-cols-2"
             style={{ gap: "10px" }}
           >
-            {/* ---------- Title ---------- */}
             <TextField className="md:col-span-2" isRequired name="title">
               <Label className="text-sm font-semibold text-gray-800">
                 Tuition Title
@@ -211,7 +176,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
               <FieldError />
             </TextField>
 
-            {/* ---------- Subject ---------- */}
             <TextField isRequired name="subject">
               <Label className="text-sm font-semibold text-gray-800">
                 Subject
@@ -226,7 +190,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
               <FieldError />
             </TextField>
 
-            {/* ---------- Class Level (dropdown) ---------- */}
             <TextField isRequired name="classLevel">
               <Label className="text-sm font-semibold text-gray-800">
                 Class Level
@@ -242,8 +205,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
                   <Select.Indicator />
                 </Select.Trigger>
                 <Select.Popover>
-                  {/* NOTE: React Aria matches selectedKey against the
-                      item's id (NOT the React key) — every item needs an id */}
                   <ListBox>
                     <ListBox.Item key="Class 6-7" id="Class 6-7">
                       Class 6-7
@@ -269,7 +230,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
               <FieldError />
             </TextField>
 
-            {/* ---------- Mode (Online / Offline) ---------- */}
             <TextField isRequired name="mode">
               <Label className="text-sm font-semibold text-gray-800">
                 Teaching Mode
@@ -285,7 +245,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
                   <Select.Indicator />
                 </Select.Trigger>
                 <Select.Popover>
-                  {/* id = the value saved in form.mode (Online/Offline) */}
                   <ListBox>
                     <ListBox.Item key="Online" id="Online">
                       Online
@@ -299,7 +258,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
               <FieldError />
             </TextField>
 
-            {/* ---------- Location (required if Offline) ---------- */}
             <TextField name="location">
               <Label className="text-sm font-semibold text-gray-800">
                 Location
@@ -318,7 +276,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
               <FieldError />
             </TextField>
 
-            {/* ---------- Monthly Fee ---------- */}
             <TextField isRequired name="fee" type="number">
               <Label className="text-sm font-semibold text-gray-800">
                 Monthly Fee (৳)
@@ -335,7 +292,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
               <FieldError />
             </TextField>
 
-            {/* ---------- Days per Week (dropdown) ---------- */}
             <TextField isRequired name="days">
               <Label className="text-sm font-semibold text-gray-800">
                 Days per Week
@@ -363,7 +319,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
               <FieldError />
             </TextField>
 
-            {/* ---------- Description ---------- */}
             <TextField
               className="md:col-span-2"
               isRequired
@@ -386,11 +341,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
               <FieldError />
             </TextField>
 
-            {/* ==================================================
-                BANNER IMAGE — optional here.
-                Shows the CURRENT banner; clicking lets you
-                replace it (new file goes to ImgBB on save).
-                ================================================== */}
             <div className="md:col-span-2">
               <span className="text-sm font-semibold text-gray-800">
                 Banner Image{" "}
@@ -404,14 +354,12 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
                 className="mt-1.5 flex cursor-pointer items-center gap-4 rounded-lg border-2 border-dashed border-emerald-300 bg-emerald-50/50 p-4 transition-all hover:border-emerald-500 hover:bg-emerald-50"
               >
                 {preview ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- local blob preview, not a remote image
                   <img
                     src={preview}
                     alt="New banner preview"
                     className="h-20 w-32 rounded-md object-cover ring-1 ring-emerald-200"
                   />
                 ) : (
-                  // eslint-disable-next-line @next/next/no-img-element -- DB image, host not known at build time
                   <img
                     src={tuition.image}
                     alt="Current banner"
@@ -427,8 +375,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
                 </span>
               </label>
 
-              {/* The real file input — `hidden` keeps it invisible.
-                  The label above is the visible button. */}
               <input
                 id="edit-banner"
                 name="banner"
@@ -440,7 +386,6 @@ export default function TuitionEditForm({ tuition, onSaved, onCancel }: Props) {
             </div>
           </FieldGroup>
 
-          {/* ---------- Save + Cancel ---------- */}
           <div className="mt-4 flex w-full gap-3">
             <Button
               type="submit"

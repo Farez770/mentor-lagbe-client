@@ -3,8 +3,6 @@
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
-// FadeIn makes its children fade in and slide up when they scroll into view.
-// Pass a bigger `delay` to items later in a list to get a staggered effect.
 export default function FadeIn({
   children,
   delay = 0,

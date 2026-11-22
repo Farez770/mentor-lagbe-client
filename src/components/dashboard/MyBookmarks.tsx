@@ -1,8 +1,5 @@
 "use client";
 
-// "use client" is needed because this page passes icon
-// COMPONENTS (functions) to DashboardDrawer, and only client
-// components may receive functions as props.
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Modal, toast } from "@heroui/react";
@@ -13,7 +10,7 @@ import {
   GraduationCap,
   User,
 } from "lucide-react";
-import { LoadingSpinner } from "@/components/shared/Loading"; // shared loader
+import { LoadingSpinner } from "@/components/shared/Loading";
 import DashboardDrawer from "@/components/dashboard/DashboardDrawer";
 import {
   demoStudent,
@@ -25,39 +22,19 @@ import {
   type Bookmark as BookmarkRow,
 } from "@/lib/api/bookmarks";
 
-// ============================================================
-// MY BOOKMARKS page (/dashboard/student/bookmarks)
-//
-// NEW requirement (2026-11-21):
-//   "Free Students can bookmark 5 tuitions;
-//    Pro Students can bookmark unlimited tuitions."
-//
-// This page shows every tuition the student saved, how many
-// of their free slots are used ("3 of 5"), and lets them
-// REMOVE a bookmark through a HeroUI confirm modal (project
-// rule: no window.confirm anywhere).
-//
-// Everything comes from GET /api/bookmarks — no demo data.
-// ============================================================
 
 export default function MyBookmarks() {
-  // null = still loading the list
   const [bookmarks, setBookmarks] = useState<BookmarkRow[] | null>(null);
   const [loadError, setLoadError] = useState(false);
 
-  // plan info from the API: limit = 5 (free) or null (pro)
   const [count, setCount] = useState(0);
   const [limit, setLimit] = useState<number | null>(null);
   const [plan, setPlan] = useState<"free" | "pro">("free");
 
-  // tuitionId whose Remove request is running
   const [busyId, setBusyId] = useState<string | null>(null);
-  // which bookmark the confirm modal is open for (null = closed)
   const [removeTarget, setRemoveTarget] = useState<BookmarkRow | null>(null);
 
-  // ---------- load MY bookmarks once ----------
   useEffect(() => {
-    // "alive" = ignore the answer if the page was left first
     let alive = true;
 
     getMyBookmarks()
@@ -79,29 +56,20 @@ export default function MyBookmarks() {
     return () => {
       alive = false;
     };
-  }, []); // [] = run once when the page opens
+  }, []);
 
-  // ------------------------------------------------------------
-  // Remove (step 1): clicking Remove only OPENS the HeroUI
-  // confirm modal — nothing is removed at this point.
-  // ------------------------------------------------------------
   const onRemove = (row: BookmarkRow) => {
     setRemoveTarget(row);
   };
 
-  // ------------------------------------------------------------
-  // Remove (step 2): the user confirmed INSIDE the modal
-  // -> close the modal, call the API, drop it from the list.
-  // ------------------------------------------------------------
   const confirmRemove = async () => {
     if (!removeTarget) return;
     const row = removeTarget;
-    setRemoveTarget(null); // close the modal right away
+    setRemoveTarget(null);
 
     setBusyId(row.tuitionId);
     try {
       const result = await removeBookmark(row.tuitionId);
-      // drop the removed bookmark from the list + fix the counter
       setBookmarks((list) =>
         (list ?? []).filter((x) => x.tuitionId !== row.tuitionId),
       );
@@ -116,7 +84,6 @@ export default function MyBookmarks() {
     }
   };
 
-  // friendly date, e.g. "19 Nov 2026"
   const savedOn = (iso: string) =>
     new Date(iso).toLocaleDateString("en-GB", {
       day: "numeric",
@@ -124,7 +91,6 @@ export default function MyBookmarks() {
       year: "numeric",
     });
 
-  // The plan pill: free students see their slots, pro sees "Unlimited"
   const planPill =
     plan === "pro" ? (
       <span className="inline-block rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-200">
@@ -134,7 +100,7 @@ export default function MyBookmarks() {
       <span
         className={`inline-block rounded-full px-3 py-1 text-xs font-bold ring-1 ${
           limit !== null && count >= limit
-            ? "bg-rose-50 text-rose-700 ring-rose-200" // full
+            ? "bg-rose-50 text-rose-700 ring-rose-200"
             : "bg-white text-emerald-700 ring-emerald-200"
         }`}
       >
@@ -142,16 +108,11 @@ export default function MyBookmarks() {
       </span>
     );
 
-  // ============================================================
-  // Render
-  // ============================================================
   return (
     <section className="bg-slate-50 pb-6">
       <DashboardDrawer
         title="Student Dashboard"
         sections={studentSections}
-        // Fallback user while the session loads — the drawer
-        // swaps in the REAL logged-in student automatically.
         user={{
           name: demoStudent.name,
           role: "Student",
@@ -159,7 +120,6 @@ export default function MyBookmarks() {
         }}
       >
         <div className="mx-auto mt-12 max-w-5xl px-4">
-          {/* ---------- Page heading ---------- */}
           <div className="mb-5 flex justify-between">
             <div>
               <p className="text-xs font-bold tracking-widest text-emerald-700">
@@ -173,7 +133,6 @@ export default function MyBookmarks() {
                 save up to 5, Pro accounts unlimited.
               </p>
 
-              {/* plan pill (count vs limit) — only once loaded */}
               {bookmarks !== null && !loadError && (
                 <span className="mt-2 flex flex-wrap gap-2">
                   <span className="inline-block rounded-full bg-white px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
@@ -194,9 +153,6 @@ export default function MyBookmarks() {
             </div>
           </div>
 
-          {/* ==================================================
-              1) ERROR — API not reachable
-              ================================================== */}
           {loadError ? (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-14 text-center">
               <Bookmark className="mx-auto h-9 w-9 text-slate-300" />
@@ -216,10 +172,8 @@ export default function MyBookmarks() {
               </button>
             </div>
           ) : bookmarks === null ? (
-            /* ---------- 2) LOADING (shared loader) ---------- */
             <LoadingSpinner label="Loading your bookmarks…" />
           ) : bookmarks.length === 0 ? (
-            /* ---------- 3) EMPTY ---------- */
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-14 text-center">
               <Bookmark className="mx-auto h-9 w-9 text-slate-300" />
               <h2 className="mt-3 text-lg font-bold text-slate-900">
@@ -237,7 +191,6 @@ export default function MyBookmarks() {
               </Link>
             </div>
           ) : (
-            /* ---------- 4) THE LIST (card grid) ---------- */
             <ul className="space-y-4">
               {bookmarks.map((row) => (
                 <li
@@ -246,11 +199,8 @@ export default function MyBookmarks() {
                 >
                   {row.tuition ? (
                     <>
-                      {/* tuition title + status badge */}
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div className="flex items-center gap-3">
-                          {/* banner thumbnail (plain img: any host) */}
-                          {/* eslint-disable-next-line @next/next/no-img-element -- banner hosts vary */}
                           <img
                             src={row.tuition.image}
                             alt={row.tuition.title}
@@ -270,7 +220,6 @@ export default function MyBookmarks() {
                             </p>
                           </div>
                         </div>
-                        {/* inactive / unapproved listings are flagged */}
                         {!row.tuition.isActive ||
                         row.tuition.approvalStatus !== "approved" ? (
                           <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">
@@ -283,7 +232,6 @@ export default function MyBookmarks() {
                         )}
                       </div>
 
-                      {/* subject · class level · fee · tutor */}
                       <div className="mt-3 grid gap-1.5 text-sm text-gray-700 sm:grid-cols-2">
                         <p className="flex items-center gap-2">
                           <GraduationCap
@@ -316,7 +264,6 @@ export default function MyBookmarks() {
                       </div>
                     </>
                   ) : (
-                    /* the tuition was DELETED after being bookmarked */
                     <div className="flex items-center gap-3">
                       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400">
                         <GraduationCap size={18} />
@@ -332,7 +279,6 @@ export default function MyBookmarks() {
                     </div>
                   )}
 
-                  {/* ---------- Remove + View actions ---------- */}
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <button
                       type="button"
@@ -360,11 +306,6 @@ export default function MyBookmarks() {
             </ul>
           )}
 
-          {/* ==================================================
-              REMOVE CONFIRM MODAL (HeroUI)
-              Opens from the Remove button on any card — the
-              bookmark is only deleted after the user confirms.
-              ================================================== */}
           <Modal
             isOpen={removeTarget !== null}
             onOpenChange={(open) => {

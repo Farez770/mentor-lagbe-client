@@ -3,8 +3,6 @@
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
-// Float makes its children gently bob up and down forever.
-// Good for the small cards floating on top of the hero image.
 export default function Float({
   children,
   delay = 0,

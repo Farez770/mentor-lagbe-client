@@ -26,13 +26,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      // HeroUI's useTheme() adds .dark + data-theme after hydration,
-      // so React must not complain about those extra attributes.
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-[family-name:var(--font-geist-sans)]">
-        {/* One provider for the whole app => navbar + dashboard toggles stay in sync. */}
         <ThemeProvider>
           <Toast.Provider placement="top end" />
           <Navbar />

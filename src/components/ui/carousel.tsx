@@ -90,8 +90,6 @@ function Carousel({
 
   React.useEffect(() => {
     if (!api || !setApi) return
-    // Delay the state update with a timeout so it does not run
-    // synchronously inside the effect (required by the React lint rule)
     const timeout = setTimeout(() => setApi(api), 0)
     return () => clearTimeout(timeout)
   }, [api, setApi])

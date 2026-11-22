@@ -1,43 +1,23 @@
 import { apiFetch } from "./client";
 
-// ============================================================
-// Applications — a student applies for a tuition, the tutor
-// reviews it in the Manage Applicants page.
-//
-// Every function calls the Express API
-// (../mentor-lagbe-server/index.js). Pages/components NEVER
-// call fetch() directly — they import these functions instead.
-// ============================================================
 
-// What the "Apply" form sends to POST /api/applications
 export type ApplicationInput = {
-  tuitionId: string; // which tuition this is for
+  tuitionId: string;
   studentName: string;
   studentEmail: string;
   studentPhone: string;
-  preferredSchedule: string; // e.g. "Sat–Wed, 7:00 PM"
-  note: string; // optional ("" when left empty)
+  preferredSchedule: string;
+  note: string;
 };
 
-// One application as it comes back from MongoDB
 export type Application = ApplicationInput & {
   id: string;
-  tutorId: string; // the tutor who reviews it
-  tuitionTitle: string; // snapshot shown in the tutor's inbox
+  tutorId: string;
+  tuitionTitle: string;
   status: "pending" | "accepted" | "rejected";
   createdAt: string;
-  // ★ REQUIREMENT UPDATE (2026-11-21): the old Pro benefit
-  //   "priority booking" was REPLACED by the new requirement
-  //   "Free = 5 bookmarks / Pro = unlimited bookmarks" (see
-  //   lib/api/bookmarks.ts). The field below is commented out
-  //   because the server no longer returns it. If the old
-  //   requirement comes back, uncomment it together with the
-  //   sort in GET /api/applications/tutor.
-  // studentPlan: "free" | "pro";
 };
 
-// POST /api/applications — send an application (login required;
-// one application per student per tuition)
 export function applyForTuition(input: ApplicationInput) {
   return apiFetch<{ message: string; application: Application }>(
     "/api/applications",
@@ -48,17 +28,12 @@ export function applyForTuition(input: ApplicationInput) {
   );
 }
 
-// GET /api/applications/tutor — ALL applications that arrived
-// on MY tuition posts (tutor role required, newest first).
-// (The old "Pro students come first" note was removed with
-// the 2026-11-21 requirement update — see bookmarks.ts.)
 export function getTutorApplications() {
   return apiFetch<{ applications: Application[] }>(
     "/api/applications/tutor",
   );
 }
 
-// PATCH /api/applications/:id — accept or reject one application
 export function updateApplicationStatus(
   id: string,
   status: "accepted" | "rejected",
@@ -72,9 +47,6 @@ export function updateApplicationStatus(
   );
 }
 
-// ============================================================
-// Student Overview numbers (the 4 dashboard stat cards)
-// ============================================================
 export type StudentStats = {
   totalApplied: number; // Total Applied Tuitions
   accepted: number; // Accepted Applications
@@ -82,15 +54,10 @@ export type StudentStats = {
   plan: string; // Current Plan: "free" | "pro"
 };
 
-// GET /api/applications/stats — MY application counts
-// (login required, student role)
 export function getStudentStats() {
   return apiFetch<{ stats: StudentStats }>("/api/applications/stats");
 }
 
-// ============================================================
-// One row of the "My Applications" list
-// ============================================================
 export type MyApplication = {
   id: string;
   tuitionId: string; // used for the link to the details page
@@ -102,17 +69,12 @@ export type MyApplication = {
   status: "pending" | "accepted" | "rejected";
 };
 
-// GET /api/applications/mine — every application I sent
-// (login required, student role). The backend joins the
-// tutor name/email and the fee for each row.
 export function getMyApplications() {
   return apiFetch<{ applications: MyApplication[] }>(
     "/api/applications/mine",
   );
 }
 
-// DELETE /api/applications/:id — cancel MY OWN application.
-// The server only allows this while the status is "pending".
 export function cancelApplication(id: string) {
   return apiFetch<{ message: string }>(`/api/applications/${id}`, {
     method: "DELETE",

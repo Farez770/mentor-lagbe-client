@@ -25,27 +25,22 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
-// ★ REQUIREMENT UPDATE (JWT): grab the signed JWT right after sign-up.
 import { primeJwtToken } from "@/lib/api/client";
 import { useRouter } from "next/navigation";
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  // The role chosen on the form — only these two values are allowed
   const [selectedRole, setSelectedRole] = useState<"student" | "tutor">(
     "student",
   );
 
-  // useRouter lets us navigate to another page from a button/form handler
   const router = useRouter();
 
   const onSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     const formData = new FormData(form);
-    // const userData = Object.fromEntries(formData.entries());
-    // console.log(userData);
     const image = formData.get("image") as File;
     console.log(image);
 
@@ -105,10 +100,6 @@ const SignUpPage = () => {
       return;
     }
 
-    // Create the account in BetterAuth (saves into the "users" collection).
-    // `role` is an additional field declared in src/lib/auth.ts, so it is
-    // accepted here and stored in MongoDB. The plan is NOT sent: BetterAuth
-    // sets plan: "free" by default, so nobody can fake a pro plan.
     const { data, error } = await authClient.signUp.email({
       name: userData.name,
       email: userData.email,
@@ -119,8 +110,6 @@ const SignUpPage = () => {
     });
 
     if (data) {
-      // ★ REQUIREMENT UPDATE (JWT): Better Auth has created the session
-      // cookie, so we can immediately request the signed JWT as well.
       await primeJwtToken();
 
       toast.success("Sign up successful!");
@@ -139,7 +128,6 @@ const SignUpPage = () => {
     }
 
     if (error) {
-      // Show the real reason (e.g. email already exists)
       toast.warning(`Sign up failed! ${error.message ?? ""}`);
     }
     form.reset();
@@ -156,7 +144,6 @@ const SignUpPage = () => {
   return (
     <main className="min-h-screen bg-[#F4F8F5] px-4 py-6 sm:px-6 lg:py-8">
       <div className="mx-auto grid max-w-6xl overflow-hidden rounded-2xl bg-white shadow-xl shadow-emerald-950/5 lg:grid-cols-2">
-        {/* Left Side */}
         <section className="relative hidden overflow-hidden bg-[#123C3A] p-9 text-white lg:block xl:p-11">
           <div className="absolute -right-24 -top-24 size-80 rounded-full border-[50px] border-white/5" />
           <div className="absolute -bottom-32 -left-20 size-96 rounded-full bg-emerald-400/10 blur-2xl" />
@@ -218,7 +205,6 @@ const SignUpPage = () => {
           </div>
         </section>
 
-        {/* Sign Up Form */}
         <section className="px-5 py-7 sm:px-10 sm:py-7 lg:px-11 xl:px-14">
           <div className="mx-auto max-w-md">
             <div className="mb-5">
@@ -244,7 +230,6 @@ const SignUpPage = () => {
                 </Fieldset.Legend>
 
                 <FieldGroup className="gap-3">
-                  {/* Role Selection */}
                   <div>
                     <Label className="mb-2 block text-sm font-semibold text-gray-800">
                       Join as
@@ -309,7 +294,6 @@ const SignUpPage = () => {
                     <input type="hidden" name="role" value={selectedRole} />
                   </div>
 
-                  {/* Full Name */}
                   <TextField
                     isRequired
                     name="name"
@@ -331,7 +315,6 @@ const SignUpPage = () => {
                     <FieldError />
                   </TextField>
 
-                  {/* Profile Image */}
                   <TextField name="image" type="file">
                     <Label className="text-sm font-semibold text-gray-800">
                       Profile Image
@@ -360,7 +343,6 @@ const SignUpPage = () => {
                     </label>
                   </TextField>
 
-                  {/* Email */}
                   <TextField isRequired name="email" type="email">
                     <Label className="text-sm font-semibold text-gray-800">
                       Email Address
@@ -375,7 +357,6 @@ const SignUpPage = () => {
                     <FieldError />
                   </TextField>
 
-                  {/* Password */}
                   <TextField
                     isRequired
                     name="password"
@@ -429,7 +410,6 @@ const SignUpPage = () => {
                     <FieldError />
                   </TextField>
 
-                  {/* Confirm Password */}
                   <TextField isRequired name="confirmPassword" minLength={8}>
                     <Label className="text-sm font-semibold text-gray-800">
                       Confirm Password
@@ -468,7 +448,6 @@ const SignUpPage = () => {
                     <FieldError />
                   </TextField>
 
-                  {/* Default Plan */}
                   <input type="hidden" name="plan" value="free" />
                 </FieldGroup>
 
@@ -477,7 +456,6 @@ const SignUpPage = () => {
                     type="submit"
                     className="h-12 w-full rounded-lg bg-emerald-600  text-sm font-semibold text-white shadow-md shadow-emerald-900/10 transition-all hover:bg-emerald-700"
                   >
-                    {/* [#174D38] [#103B2B]*/}
                     Create Account / Sign Up
                   </Button>
                 </Fieldset.Actions>

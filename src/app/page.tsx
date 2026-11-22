@@ -6,7 +6,6 @@ import PricingSection from "@/components/home/PricingSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import CtaBanner from "@/components/home/CtaBanner";
 
-// All the home page sections stacked in order
 export default function Home() {
   return (
     <>

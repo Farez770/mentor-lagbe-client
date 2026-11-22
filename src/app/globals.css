@@ -5,10 +5,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* NOTE: with Tailwind v4 + Turbopack in this setup, plain custom CSS rules
-   (like .my-class { ... }) are NOT included in the compiled output.
-   Only the two @imports above and @theme blocks are processed.
-   So always style elements with Tailwind utility classes instead. */
 
 @theme inline {
   --font-sans: var(--font-sans);
@@ -55,7 +51,6 @@
 }
 
 :root {
-  /* Tells native controls (inputs, scrollbars) to use light styling. */
   color-scheme: light;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -92,7 +87,6 @@
 }
 
 .dark {
-  /* HeroUI's useTheme() adds this class to <html>. */
   color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -145,17 +139,7 @@
   }
 }
 
-/* ============================================================
-   DARK PALETTE ADAPTER
-   The UI was originally written with light-only utilities like
-   bg-white / bg-slate-50 / text-slate-900. Rather than rewrite
-   every component, these rules remap those SAME utility classes
-   when <html> has the .dark class (added by HeroUI's useTheme).
-   text-white is deliberately NOT remapped — buttons on emerald
-   backgrounds must keep white labels.
-   ============================================================ */
 @layer utilities {
-  /* --- surfaces --- */
   .dark .bg-white {
     background-color: #0f172a;
   }
@@ -207,7 +191,6 @@
     background-color: #78350f;
   }
 
-  /* Arbitrary hex colours used by the auth pages / headings. */
   .dark .bg-\[\#F4F8F5\] {
     background-color: #020617;
   }
@@ -218,8 +201,6 @@
     color: #f8fafc;
   }
 
-  /* Gradients: Tailwind v4 builds gradients from these CSS variables,
-     so overriding the STOPS flips the hero without editing its JSX. */
   .dark .from-emerald-50 {
     --tw-gradient-from: #052e2b;
   }
@@ -230,7 +211,6 @@
     --tw-gradient-to: #0f172a;
   }
 
-  /* --- text --- */
   .dark .text-slate-900,
   .dark .text-black {
     color: #f8fafc;
@@ -253,8 +233,6 @@
   .dark .text-gray-400 {
     color: #94a3b8;
   }
-  /* Keep 200/300 shades LIGHT in dark mode — they are used as muted
-     text on already-dark cards and on the green auth branding panel. */
   .dark .text-slate-300,
   .dark .text-gray-300 {
     color: #cbd5e1;
@@ -278,7 +256,6 @@
     color: #6ee7b7;
   }
 
-  /* Input placeholders are a separate pseudo-element selector. */
   .dark .placeholder\:text-gray-500::placeholder {
     color: #94a3b8;
   }
@@ -286,7 +263,6 @@
     color: #64748b;
   }
 
-  /* --- borders / rings --- */
   .dark .border-slate-100,
   .dark .border-slate-200,
   .dark .border-slate-300,
@@ -308,7 +284,6 @@
     --tw-ring-color: #1e293b;
   }
 
-  /* --- hover states (profile menu, cards, buttons) --- */
   .dark .hover\:border-emerald-600:hover {
     border-color: #34d399;
   }
@@ -368,9 +343,6 @@
     --tw-ring-color: #059669;
   }
 
-  /* Amber accent buttons/badges MUST keep dark text. The generic
-     text-slate-900 remap above would otherwise turn these labels
-     white, which is unreadable on a bright amber background. */
   .bg-amber-400.text-slate-900,
   .bg-amber-500.text-white,
   .dark .bg-amber-400.text-slate-900,
@@ -378,7 +350,6 @@
     color: #1c1917;
   }
 
-  /* Make the switch itself feel smooth instead of snapping. */
   .dark .bg-white,
   .dark .bg-slate-50,
   .dark .bg-slate-100,
@@ -397,27 +368,3 @@
   }
 }
 
-/* ============================================================
-   DASHBOARD PAGES: no site navbar, no site footer.
-
-   This used to be done with CSS:
-     body:has(#dashboard-sidebar) > header/footer { display: none }
-     body:has(#dashboard-sidebar) { overflow: hidden }
-
-   That broke with Next.js 16 Cache Components (cacheComponents
-   is ON in next.config.ts): the router keeps the PREVIOUS route
-   mounted in a hidden React <Activity> for instant back
-   navigation. So after visiting a dashboard page, its hidden
-   DOM (including #dashboard-sidebar) stayed in the document —
-   the rules above kept matching on the HOME page too: the
-   navbar/footer stayed hidden AND the body stayed scroll-
-   locked, so only the hero was visible until a full refresh.
-
-   The hiding now lives in the components themselves, keyed to
-   usePathname() which only ever reflects the ACTIVE route
-   (leftover hidden DOM can never affect it):
-     - Navbar.tsx  -> return null on /dashboard/*
-     - Footer.tsx  -> return null on /dashboard/*
-     - DashboardDrawer.tsx -> locks body scroll in an effect
-       (React runs its cleanup when the route is hidden/gone)
-   ============================================================ */

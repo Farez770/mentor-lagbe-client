@@ -2,7 +2,6 @@ import Link from "next/link";
 import SectionHeading from "@/components/shared/SectionHeading";
 import FadeIn from "@/components/shared/FadeIn";
 
-// Popular subjects shown as clickable-looking chips (design only)
 const subjects = [
   { name: "Mathematics", icon: "📐", count: 120 },
   { name: "Physics", icon: "⚛️", count: 85 },
@@ -22,7 +21,6 @@ export default function TopSubjects() {
           description="The most in-demand subjects on MentorLagbe right now. Pick one and see all the matching tuition batches."
         />
 
-        {/* Subject cards in a grid */}
         <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-6">
           {subjects.map((subject, index) => (
             <FadeIn key={subject.name} delay={index * 0.08}>

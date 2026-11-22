@@ -13,48 +13,23 @@ import { authClient } from "@/lib/auth-client";
 import { uploadToImgBB } from "@/lib/imgbb";
 import { updateProfile, type ProfileForm } from "@/lib/api/profile";
 
-// ============================================================
-// UPDATE PROFILE page (/dashboard/profile)
-//
-// Project requirement:
-//   Every logged-in user (Student, Tutor, Admin) can update
-//   their Name, Phone, Bio and upload a Profile Picture using
-//   the ImgBB API (optional) / image URL.
-//
-// - The form starts from the BetterAuth session (no extra
-//   GET request is needed).
-// - Saving calls PATCH /api/profile on the Express server.
-// - After saving, refetch() re-reads the session so the
-//   navbar + sidebar show the new name / photo at once.
-// ============================================================
 
-// Final fallback for any unknown role — only the Profile link.
-// Every real role (tutor, student, admin) has its own menu.
 const basicSections: DashboardSection[] = [
   { name: "Update Profile", href: "/dashboard/profile", icon: UserCog },
 ];
 
-// Same input styles as the sign-in / post-tuition forms
 const inputClass =
   "h-10 w-full rounded-lg border border-emerald-300 bg-white px-3 text-sm text-gray-800 shadow-sm outline-none transition-all placeholder:text-gray-500 hover:border-emerald-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100";
 
 export default function UpdateProfile() {
-  // THE REAL LOGGED-IN USER — every field starts from here.
   const { data: session, refetch } = authClient.useSession();
 
-  // null = "nothing edited yet" -> the inputs show the session
-  // values (see `current` below). The moment the user types
-  // anything, everything is snapshotted into this state.
   const [form, setForm] = useState<ProfileForm | null>(null);
 
-  // A newly picked picture file (uploaded to ImgBB on save)
   const [newFile, setNewFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // What the inputs currently show:
-  //   the edited values once the user touched the form,
-  //   otherwise the session values (kept fresh by refetch()).
   const current: ProfileForm = form ?? {
     name: session?.user?.name ?? "",
     phone: session?.user?.phone ?? "",
@@ -62,35 +37,26 @@ export default function UpdateProfile() {
     image: session?.user?.image || "",
   };
 
-  // One field changed -> snapshot session values + this edit
   const update = (key: keyof ProfileForm, value: string) =>
     setForm({ ...current, [key]: value });
 
-  // Free the local preview URL when it changes / page unmounts
   useEffect(() => {
     return () => {
       if (filePreview) URL.revokeObjectURL(filePreview);
     };
   }, [filePreview]);
 
-  // ------------------------------------------------------------
-  // When the user picks a picture file -> keep it + show preview
-  // ------------------------------------------------------------
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setNewFile(file);
-    setFilePreview(URL.createObjectURL(file)); // local blob preview
-    e.target.value = ""; // so picking the SAME file again still works
+    setFilePreview(URL.createObjectURL(file));
+    e.target.value = "";
   };
 
-  // ------------------------------------------------------------
-  // Save: validate -> (optional ImgBB upload) -> PATCH -> refresh
-  // ------------------------------------------------------------
   const onSave = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // client-side checks (the server checks them again)
     if (current.name.trim().length < 2) {
       toast.warning("Name must be at least 2 characters");
       return;
@@ -106,8 +72,6 @@ export default function UpdateProfile() {
 
     setIsSaving(true);
     try {
-      // Picture priority: a picked file wins, otherwise the URL
-      // field is used ("" = no photo -> letter avatar everywhere).
       let image = current.image.trim();
       if (newFile) {
         image = await uploadToImgBB(newFile);
@@ -120,20 +84,16 @@ export default function UpdateProfile() {
         image,
       });
 
-      // keep the form in sync with what the database saved
       setForm({
         name: result.profile.name,
         phone: result.profile.phone,
         bio: result.profile.bio,
         image: result.profile.image,
       });
-      // the picked file is saved now — clear the local choice
       setNewFile(null);
 
       toast.success(result.message || "Profile updated");
 
-      // re-read the BetterAuth session so the navbar, the
-      // sidebar user card and this form all show fresh values
       await refetch();
     } catch (err) {
       toast.warning(
@@ -144,10 +104,6 @@ export default function UpdateProfile() {
     }
   };
 
-  // Which sidebar menu fits the current role — each role has
-  // its own menu now, anything unexpected gets the fallback.
-  // Cast to string: "admin" exists in the DB but not in the
-  // BetterAuth type union ["student", "tutor"].
   const role = session?.user?.role as string | undefined;
   const sections =
     role === "tutor"
@@ -158,23 +114,16 @@ export default function UpdateProfile() {
           ? adminSections
           : basicSections;
 
-  // Picture preview: newly picked file > saved URL > letter avatar
   const shownImage = filePreview || current.image;
 
-  // ============================================================
-  // Render
-  // ============================================================
   return (
     <section className="bg-slate-50 pb-6">
       <DashboardDrawer
         title="My Profile"
         sections={sections}
-        // Fallback user while the session loads — the drawer
-        // swaps in the REAL logged-in user automatically.
         user={{ name: demoTutor.name, role: "Tutor", plan: demoTutor.plan }}
       >
         <div className="mx-auto mt-12 max-w-2xl px-4">
-          {/* ---------- Page heading ---------- */}
           <div className="mb-5">
             <p className="text-xs font-bold tracking-widest text-emerald-700">
               MY PROFILE
@@ -188,12 +137,9 @@ export default function UpdateProfile() {
             </p>
           </div>
 
-          {/* ---------- The card ---------- */}
           <div className="rounded-2xl bg-white p-5 shadow-lg ring-1 ring-emerald-950/5 sm:p-7">
-            {/* ===== profile picture row ===== */}
             <div className="flex flex-wrap items-center gap-4">
               {shownImage ? (
-                // eslint-disable-next-line @next/next/no-img-element -- profile pictures can come from any domain
                 <img
                   src={shownImage}
                   alt="Profile picture preview"
@@ -206,7 +152,6 @@ export default function UpdateProfile() {
               )}
 
               <div className="min-w-0 flex-1">
-                {/* [1] upload a file (goes to ImgBB on save) */}
                 <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-emerald-600 px-3 py-2 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-50">
                   <Camera size={14} />
                   Choose picture
@@ -218,7 +163,6 @@ export default function UpdateProfile() {
                   />
                 </label>
 
-                {/* [2] …or paste a direct image URL */}
                 <input
                   type="text"
                   value={current.image}
@@ -233,9 +177,7 @@ export default function UpdateProfile() {
               </div>
             </div>
 
-            {/* ===== the form ===== */}
             <form onSubmit={onSave} className="mt-5 grid gap-3 sm:grid-cols-2">
-              {/* Name (the only required field) */}
               <label className="block">
                 <span className="text-sm font-semibold text-gray-800">
                   Name *
@@ -248,7 +190,6 @@ export default function UpdateProfile() {
                 />
               </label>
 
-              {/* Email — read-only (changing it is not part of this page) */}
               <label className="block">
                 <span className="text-sm font-semibold text-gray-800">
                   Email
@@ -263,7 +204,6 @@ export default function UpdateProfile() {
                 />
               </label>
 
-              {/* Phone */}
               <label className="block">
                 <span className="text-sm font-semibold text-gray-800">
                   Phone
@@ -276,7 +216,6 @@ export default function UpdateProfile() {
                 />
               </label>
 
-              {/* Role + plan — read-only info badges */}
               <div>
                 <span className="text-sm font-semibold text-gray-800">
                   Account
@@ -291,7 +230,6 @@ export default function UpdateProfile() {
                 </div>
               </div>
 
-              {/* Bio (full width, with a live counter) */}
               <label className="block sm:col-span-2">
                 <span className="flex items-center justify-between text-sm font-semibold text-gray-800">
                   Bio
@@ -314,7 +252,6 @@ export default function UpdateProfile() {
                 />
               </label>
 
-              {/* Save */}
               <div className="sm:col-span-2">
                 <button
                   type="submit"

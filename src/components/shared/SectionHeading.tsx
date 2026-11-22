@@ -1,7 +1,5 @@
 import FadeIn from "@/components/shared/FadeIn";
 
-// Shared section heading so every section on the site looks the same.
-// It fades in when scrolled into view.
 export default function SectionHeading({
   tagline,
   title,

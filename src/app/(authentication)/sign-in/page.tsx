@@ -23,27 +23,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
-// ★ REQUIREMENT UPDATE (JWT): grab the signed JWT right after login.
 import { primeJwtToken } from "@/lib/api/client";
 import { useRouter } from "next/navigation";
 
-// ============================================================
-// SIGN IN page — email + password only.
-// There is NO role selector here on purpose: the role was
-// chosen at sign-up and saved in MongoDB, so sign-in READS it
-// from the account and redirects the user to their own
-// dashboard (role-based sign in).
-// Google sign-in is wired below; it works once the Google OAuth
-// credentials are set in .env.local.
-// ============================================================
 const SignInPage = () => {
-  // Show / hide the password
   const [showPassword, setShowPassword] = useState(false);
 
-  // Disables the button while BetterAuth is working
   const [isPending, setIsPending] = useState(false);
 
-  // useRouter lets us navigate to another page from a button/form handler
   const router = useRouter();
 
   // Google OAuth (optional). Better Auth sends the user to Google and
@@ -75,7 +62,6 @@ const SignInPage = () => {
     const email = (formData.get("email") as string)?.trim() ?? "";
     const password = (formData.get("password") as string) ?? "";
 
-    // Defensive check — the fields are also marked isRequired
     if (!email || !password) {
       toast.warning("Please fill in your email and password");
       return;
@@ -83,9 +69,6 @@ const SignInPage = () => {
 
     setIsPending(true);
 
-    // Sign in with BetterAuth (checks the "users" collection).
-    // On success `data.user` contains the saved fields,
-    // including the role we stored at sign-up.
     const { data, error } = await authClient.signIn.email({
       email,
       password,
@@ -94,18 +77,12 @@ const SignInPage = () => {
     setIsPending(false);
 
     if (error) {
-      // Show the real reason (wrong password, unknown email, ...)
       toast.warning(`Sign in failed! ${error.message ?? ""}`);
       return;
     }
 
-    // ★ REQUIREMENT UPDATE (JWT): the session cookie is now available,
-    // so ask Better Auth for a signed JWT. apiFetch will reuse this JWT
-    // for the protected Express API calls. Failure is non-fatal here:
-    // apiFetch can always request a fresh JWT later.
     await primeJwtToken();
 
-    // ---- Success: return to the requested tuition for Student accounts -----
     toast.success(`Welcome back, ${data.user.name}!`);
 
     const callbackUrl = new URLSearchParams(window.location.search).get(
@@ -124,26 +101,16 @@ const SignInPage = () => {
     }
 
     if (data.user.role === "tutor") {
-      // Tutors land on their dashboard
       router.push("/dashboard/tutor");
     } else if ((data.user.role as string) === "admin") {
-      // Admins land on the ADMIN dashboard (Overview with the
-      // platform stats cards). Cast needed because "admin"
-      // lives in the DB but not in the BetterAuth type union
-      // ["student", "tutor"] (see additionalFields.role).
       router.push("/dashboard/admin");
     } else {
-      // Students land on THEIR dashboard (Overview page with
-      // the 4 stats cards)
       router.push("/dashboard/student");
     }
 
-    // Refresh server components so the navbar picks up the
-    // new session (avatar, name, role badge) immediately.
     router.refresh();
   };
 
-  // Same input styles as the sign-up page
   const inputClass =
     "h-10 w-full rounded-lg border border-emerald-300 bg-white px-3 text-sm text-gray-800 shadow-sm outline-none transition-all placeholder:text-gray-500 hover:border-emerald-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100";
 
@@ -153,7 +120,6 @@ const SignInPage = () => {
   return (
     <main className="min-h-screen bg-[#F4F8F5] px-4 py-6 sm:px-6 lg:py-8">
       <div className="mx-auto grid max-w-6xl overflow-hidden rounded-2xl bg-white shadow-xl shadow-emerald-950/5 lg:grid-cols-2">
-        {/* Left Side (same branding panel as sign-up) */}
         <section className="relative hidden overflow-hidden bg-[#123C3A] p-9 text-white lg:block xl:p-11">
           <div className="absolute -right-24 -top-24 size-80 rounded-full border-[50px] border-white/5" />
           <div className="absolute -bottom-32 -left-20 size-96 rounded-full bg-emerald-400/10 blur-2xl" />
@@ -215,7 +181,6 @@ const SignInPage = () => {
           </div>
         </section>
 
-        {/* Sign In Form */}
         <section className="px-5 py-7 sm:px-10 sm:py-7 lg:px-11 xl:px-14">
           <div className="mx-auto max-w-md">
             <div className="mb-5">
@@ -241,7 +206,6 @@ const SignInPage = () => {
                 </Fieldset.Legend>
 
                 <FieldGroup className="gap-3">
-                  {/* Email */}
                   <TextField isRequired name="email" type="email">
                     <Label className="text-sm font-semibold text-gray-800">
                       Email Address
@@ -256,7 +220,6 @@ const SignInPage = () => {
                     <FieldError />
                   </TextField>
 
-                  {/* Password */}
                   <TextField isRequired name="password">
                     <Label className="text-sm font-semibold text-gray-800">
                       Password
@@ -307,15 +270,12 @@ const SignInPage = () => {
               </Fieldset>
             </Form>
 
-            {/* Google sign-in — wired to Better Auth. If the OAuth
-                env vars are missing, Better Auth shows an error toast. */}
             <button
               type="button"
               // onClick={handleGoogleSignIn}
               disabled={isPending}
               className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {/* Google "G" logo */}
               <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true">
                 <path
                   fill="#4285F4"

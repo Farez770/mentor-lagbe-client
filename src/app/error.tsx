@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 
-// Error boundary — shown when a page crashes while rendering.
 export default function ErrorPage({
   reset,
 }: {

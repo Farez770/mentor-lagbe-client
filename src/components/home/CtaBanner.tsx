@@ -5,10 +5,8 @@ export default function CtaBanner() {
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Green banner card with the main call to action */}
         <FadeIn>
         <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl px-6 py-14 md:px-16 text-center relative overflow-hidden">
-          {/* Decorative circles */}
           <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10" />
           <div className="absolute -bottom-14 -left-10 w-56 h-56 rounded-full bg-white/10" />
 

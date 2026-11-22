@@ -9,7 +9,6 @@ import AuthBtn from "@/components/layout/authBtn";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { authClient } from "@/lib/auth-client";
 
-// Links shown to everyone in the navbar
 const navLinks = [
   { name: "Home", href: "/" },
   { name: "Browse Tuitions", href: "/tuitions" },
@@ -18,49 +17,27 @@ const navLinks = [
 ];
 
 export default function Navbar() {
-  // Used only to open/close the mobile menu
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Current route path, used to highlight the active link
   const pathname = usePathname();
 
-  // ---- Login check ---------------------------------------------
-  // Read the real BetterAuth session:
-  //   - session exists  -> user is logged in  -> show AuthBtn
-  //   - no session      -> user is a guest    -> show Sign In / Sign Up
-  // While isPending (session still loading) we show NEITHER, so the
-  // guest buttons never flash for a user who is actually logged in.
   const { data: session, isPending } = authClient.useSession();
   const isLoggedIn = !!session?.user;
 
-  // ---- Dashboard pages have NO site navbar (project rule) ----
-  // Keyed to the ACTIVE route: Next.js 16 Cache Components keeps
-  // hidden routes in the DOM (instant back navigation), so a CSS
-  // :has(#dashboard-sidebar) check would keep matching leftover
-  // dashboard DOM after navigating away — hiding the navbar on
-  // the home page too. usePathname() only ever reflects the
-  // route that is actually on screen, and it is known during
-  // SSR as well, so there is no flash on a hard load either.
   if (pathname.startsWith("/dashboard")) return null;
 
-  // Closes the menu when a link inside it is clicked
   const closeMenu = () => setMenuOpen(false);
 
-  // Returns true when a nav link matches the current page
   function isActiveLink(href: string) {
-    // Hash links like "/#how-it-works" are never marked active
     if (href.includes("#")) {
       return false;
     }
-    // Home is active only on the exact home page
     if (href === "/") {
       return pathname === "/";
     }
-    // Other links are active on their own page and sub-pages
     return pathname === href || pathname.startsWith(href + "/");
   }
 
-  // Shared link styling so desktop and mobile look the same
   function getLinkClass(href: string) {
     return isActiveLink(href)
       ? "text-emerald-600 font-semibold bg-emerald-50"
@@ -70,7 +47,6 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
       <nav className="max-w-7xl mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
-        {/* Logo + brand name */}
         <Link href="/" className="flex items-center gap-2">
           <span className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center">
             <GraduationCap className="w-6 h-6 text-white" />
@@ -80,7 +56,6 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop navigation links (active link is highlighted green) */}
         <ul className="hidden lg:flex items-center gap-2">
           {navLinks.map((link) => (
             <li key={link.name}>
@@ -94,15 +69,11 @@ export default function Navbar() {
           ))}
         </ul>
 
-        {/* Desktop right side: theme switcher + logged-in view OR guest buttons */}
         <div className="hidden lg:flex items-center gap-3">
           <ThemeToggle />
           {isPending ? null : isLoggedIn ? (
-            // Logged in -> avatar, name, role badge, Dashboard,
-            // Update Profile and Sign Out (all real, from the session)
             <AuthBtn />
           ) : (
-            // Guest -> Sign In / Sign Up buttons
             <>
               <Link
                 href="/sign-in"
@@ -120,7 +91,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile: theme switcher sits next to the menu button */}
         <div className="flex items-center gap-2 lg:hidden">
           <ThemeToggle compact />
           <button
@@ -133,9 +103,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile menu — slides down slowly over the page content.
-          It is absolutely positioned below the navbar and given a high
-          z-index, so it always sits ON TOP of sections like the hero. */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -158,10 +125,6 @@ export default function Navbar() {
                 </li>
               ))}
             </ul>
-            {/* Same login check as the desktop side. The account menu
-                is a HeroUI Popover now, so no special mobile layout is
-                needed — onNavigate closes this menu when the user
-                picks Dashboard / Update Profile inside the popover */}
             <div className="mt-4">
               {isPending ? null : isLoggedIn ? (
                 <AuthBtn onNavigate={closeMenu} />

@@ -3,44 +3,23 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MapPin, CalendarDays, ArrowRight } from "lucide-react";
-import { LoadingSpinner } from "@/components/shared/Loading"; // shared loading UI
+import { LoadingSpinner } from "@/components/shared/Loading";
 import SectionHeading from "@/components/shared/SectionHeading";
 import FadeIn from "@/components/shared/FadeIn";
 import type { Tuition } from "@/components/tuitions/TuitionCard";
 import { getTuitions } from "@/lib/api/tuitions";
 
-// ============================================================
-// DYNAMIC FEATURED TUITIONS (/ home page)
-//
-// Requirement: show the 6 LATEST Approved & Active listings
-// from MongoDB, each card equal height + width, showing:
-//   Title, Subject, Class Level, Mode, Monthly Fee,
-//   Tutor Name and a "View Details" button.
-//
-// Data comes from GET /api/tuitions (newest first), which
-// returns ONLY approvalStatus === "approved" AND isActive ===
-// true posts — so slice(0, 6) is exactly the 6 LATEST Approved
-// & Active listings, as the requirement demands.
-// ============================================================
 
 export default function FeaturedTuitions() {
-  // The6 latest tuitions (starts empty until the API answers)
   const [tuitions, setTuitions] = useState<Tuition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // "alive" = ignore the answer if the page was left first
     let alive = true;
 
     getTuitions()
       .then((data) => {
         if (!alive) return;
-        // The API shape (tutorName, approvalStatus) is mapped
-        // to the card's shape (tutor, status). Safety net: only
-        // Approved & Active posts may appear (the API already
-        // filters, this guards the rule a second time), then we
-        // keep only the 6 newest of them — the "6 latest
-        // Approved & Active listings" from the requirement.
         setTuitions(
           data.tuitions
             .filter((item) => item.approvalStatus === "approved")
@@ -63,7 +42,6 @@ export default function FeaturedTuitions() {
         );
       })
       .catch((err) => {
-        // e.g. API server not running → show the empty state
         console.warn("Could not load featured tuitions:", err);
         if (alive) setTuitions([]);
       })
@@ -71,11 +49,10 @@ export default function FeaturedTuitions() {
         if (alive) setIsLoading(false);
       });
 
-    // cleanup: never set state after unmount
     return () => {
       alive = false;
     };
-  }, []); // [] = run once when the home page opens
+  }, []);
 
   return (
     <section className="py-20 bg-white">
@@ -87,10 +64,8 @@ export default function FeaturedTuitions() {
         />
 
         {isLoading ? (
-          /* ---- Still fetching from the API (shared loader) ---- */
           <LoadingSpinner label="Loading tuitions…" />
         ) : tuitions.length === 0 ? (
-          /* ---- No active tuitions in the database at all ---- */
           <FadeIn className="rounded-2xl border border-dashed border-slate-300 py-16 text-center">
             <h3 className="text-lg font-bold text-slate-900">
               No tuitions available yet
@@ -100,7 +75,6 @@ export default function FeaturedTuitions() {
             </p>
           </FadeIn>
         ) : (
-          /* ---- The grid: every card has equal height and width ---- */
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {tuitions.map((tuition, index) => (
               <FadeIn
@@ -111,7 +85,6 @@ export default function FeaturedTuitions() {
                 <div
                   className="flex flex-col h-full bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                 >
-                  {/* Card image with mode badge */}
                   <div className="relative">
                     <img
                       src={tuition.image}
@@ -132,7 +105,6 @@ export default function FeaturedTuitions() {
                     </span>
                   </div>
 
-                  {/* Card body */}
                   <div className="flex flex-col flex-grow p-5">
                     <h3 className="font-bold text-lg text-slate-900 leading-snug">
                       {tuition.title}
@@ -141,7 +113,6 @@ export default function FeaturedTuitions() {
                       Class Level: {tuition.classLevel}
                     </p>
 
-                    {/* Tutor + schedule info */}
                     <div className="mt-4 space-y-2 text-sm text-slate-600">
                       <p className="flex items-center gap-2">
                         <span className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center">
@@ -159,7 +130,6 @@ export default function FeaturedTuitions() {
                       </p>
                     </div>
 
-                    {/* Bottom row: fee + view details button */}
                     <div className="flex items-center justify-between mt-auto pt-5 border-t border-slate-100 mt-5">
                       <p>
                         <span className="text-xl font-extrabold text-emerald-600">
@@ -181,7 +151,6 @@ export default function FeaturedTuitions() {
           </div>
         )}
 
-        {/* See all button under the grid */}
         <FadeIn className="text-center mt-12">
           <Link
             href="/tuitions"

@@ -1,22 +1,5 @@
 "use client";
 
-// ============================================================
-// /pricing — Free vs Pro plan tiers for Tutors and Students.
-//
-// What happens when a visitor clicks "Subscribe with Stripe":
-//   1. guest        -> toast + redirect to /sign-in
-//   2. already Pro  -> toast "nothing to buy"
-//   3. otherwise    -> POST /api/checkout_sessions (server picks
-//      the price: $15 tutor / $10 student, role-checked) with
-//      the receipt email typed in the box above
-//   4. the browser opens Stripe's SECURE hosted page where the
-//      CARD information (number / expiry / CVC) is entered
-//   5. Stripe redirects to /payment/success, which verifies the
-//      payment and upgrades the account to plan "pro"
-//
-// The card fields intentionally live on Stripe's page — we never
-// collect raw card numbers in our own form (PCI rule).
-// ============================================================
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,20 +10,15 @@ import FadeIn from "@/components/shared/FadeIn";
 import { authClient } from "@/lib/auth-client";
 import { startCheckout, type CheckoutPlan } from "@/lib/api/payments";
 
-// One pricing card (Free OR Pro)
 type Tier = {
-  name: string; // "Free Student", "Pro Tutor", ...
-  price: number; // 0 / 10 / 15 (dollars)
-  tagline: string; // one-line description
+  name: string;
+  price: number;
+  tagline: string;
   features: { text: string; included: boolean }[];
-  planId: CheckoutPlan | null; // null = Free tier (no checkout)
-  highlighted: boolean; // dark "MOST POPULAR" style
+  planId: CheckoutPlan | null;
+  highlighted: boolean;
 };
 
-// ------------------------------------------------------------
-// The two tiers for each account type. Free limits match the
-// real rules of the app (tutors: max 2 posts on Free).
-// ------------------------------------------------------------
 const studentTiers: Tier[] = [
   {
     name: "Free Student",
@@ -59,9 +37,7 @@ const studentTiers: Tier[] = [
   },
   {
     name: "Pro Student",
-    price: 10, // $10 — the server catalog is the source of truth
-    // requirement update (2026-11-21): the benefit is unlimited
-    // bookmarks, not "priority booking" anymore
+    price: 10,
     tagline: "For learners who want unlimited bookmarks",
     planId: "student",
     highlighted: true,
@@ -94,7 +70,7 @@ const tutorTiers: Tier[] = [
   },
   {
     name: "Pro Tutor",
-    price: 15, // $15 — server catalog decides, not this file
+    price: 15,
     tagline: "For tutors who want unlimited reach",
     planId: "tutor",
     highlighted: true,
@@ -112,38 +88,26 @@ const tutorTiers: Tier[] = [
 export default function PricingPlans() {
   const router = useRouter();
 
-  // BetterAuth session: undefined while loading, null for guests
   const { data: session } = authClient.useSession();
 
-  // Is this visitor ALREADY Pro? (never buy twice)
   const isPro = String(session?.user?.plan ?? "free").toLowerCase() === "pro";
 
-  // id of the plan whose button is talking to Stripe right now
   const [busy, setBusy] = useState<CheckoutPlan | null>(null);
 
-  // The shared email box is UNCONTROLLED: we read its value with a
-  // ref when a button is clicked (no state = no effect, no lint
-  // surprises while the session loads).
   const emailRef = useRef<HTMLInputElement>(null);
 
-  // ------------------------------------------------------------
-  // "Subscribe with Stripe" was clicked
-  // ------------------------------------------------------------
   const onSubscribe = async (planId: CheckoutPlan) => {
-    // guests must sign in first
     if (!session) {
       toast.warning("Please sign in to upgrade to Pro");
       router.push("/sign-in");
       return;
     }
 
-    // already Pro? nothing to purchase
     if (isPro) {
       toast.success("You already have the Pro plan 🎉");
       return;
     }
 
-    // receipt email from the box (optional — empty = account email)
     const typedEmail = emailRef.current?.value.trim() ?? "";
     const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(typedEmail);
     if (typedEmail && !emailIsValid) {
@@ -152,28 +116,18 @@ export default function PricingPlans() {
       return;
     }
 
-    setBusy(planId); // spin this button, disable the other
+    setBusy(planId);
     try {
-      // POST /api/checkout_sessions -> hosted Stripe page URL
       const { url } = await startCheckout(planId, typedEmail || undefined);
-      // .assign() instead of `href =` keeps the React Compiler
-      // happy (no property mutation analysis complaints)
-      window.location.assign(url); // Stripe takes over from here
+      window.location.assign(url);
     } catch (err) {
-      // 400 wrong role / already pro / bad email, 403 admin,
-      // 401 signed out, network problems...
       toast.warning(
         err instanceof Error ? err.message : "Could not start checkout",
       );
-      setBusy(null); // only reached when we stay on this page
+      setBusy(null);
     }
   };
 
-  // ------------------------------------------------------------
-  // Helper (a normal function, NOT a component): returns the JSX
-  // for one card. Defining components inside a component resets
-  // their state on every render, which the React Compiler refuses.
-  // ------------------------------------------------------------
   const renderPlanCard = (tier: Tier) => (
     <div
       key={tier.name}
@@ -183,7 +137,6 @@ export default function PricingPlans() {
           : "border-slate-200 bg-white"
       }`}
     >
-      {/* name + "MOST POPULAR" badge */}
       <div className="flex items-center justify-between">
         <h3
           className={`text-lg font-bold ${tier.highlighted ? "text-white" : "text-slate-900"}`}
@@ -202,7 +155,6 @@ export default function PricingPlans() {
         {tier.tagline}
       </p>
 
-      {/* price: $0 -> "Free", $10 -> "$10 /month" */}
       <p className="mt-6">
         <span className="text-5xl font-extrabold">
           {tier.price === 0 ? "Free" : `$${tier.price}`}
@@ -217,7 +169,6 @@ export default function PricingPlans() {
         )}
       </p>
 
-      {/* feature list with check / cross icons */}
       <ul className="mt-8 flex-grow space-y-3">
         {tier.features.map((feature) => (
           <li key={feature.text} className="flex items-center gap-3 text-sm">
@@ -249,14 +200,11 @@ export default function PricingPlans() {
         ))}
       </ul>
 
-      {/* ============ BUTTON AREA ============ */}
       {tier.planId === null ? (
-        // Free tier: no purchase, no card — a static strip
         <div className="mt-8 w-full rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-3.5 text-center text-sm font-semibold text-slate-500">
           Everyone starts here — no card needed
         </div>
       ) : (
-        // Pro tier: the REAL Stripe checkout button
         <button
           type="button"
           onClick={() => onSubscribe(tier.planId!)}
@@ -282,9 +230,6 @@ export default function PricingPlans() {
     </div>
   );
 
-  // ------------------------------------------------------------
-  // Helper: a group heading + its two cards (students, tutors)
-  // ------------------------------------------------------------
   const renderGroup = (title: string, subtitle: string, tiers: Tier[]) => (
     <FadeIn>
       <h2 className="mt-14 text-center text-2xl font-extrabold text-[#173D32]">
@@ -306,10 +251,6 @@ export default function PricingPlans() {
           description="Every account starts Free. Upgrade to Pro with Stripe whenever you need more power."
         />
 
-        {/* ============ EMAIL BOX ============
-            The receipt address. The CARD details are entered on
-            the next screen — Stripe's secure hosted checkout.
-            ============================================== */}
         <FadeIn>
           <div className="mx-auto mt-8 max-w-xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <label
@@ -333,25 +274,18 @@ export default function PricingPlans() {
           </div>
         </FadeIn>
 
-        {/* ============ STUDENT TIERS ============ */}
         {renderGroup(
           "For Students",
-          // requirement update (2026-11-21): the student benefit
-          // is the bookmark limit (Free = 5, Pro = unlimited)
           "Free students can bookmark 5 tuitions — Pro students unlimited.",
           studentTiers,
         )}
 
-        {/* ============ TUTOR TIERS ============ */}
         {renderGroup(
           "For Tutors",
           "Post more tuitions and earn a verified badge.",
           tutorTiers,
         )}
 
-        {/* ============ CARD SECURITY NOTE ============
-            Explains where the card information is actually typed.
-            ============================================== */}
         <FadeIn delay={0.15}>
           <div className="mx-auto mt-12 max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
             <h3 className="flex items-center gap-2 text-base font-bold text-slate-900">

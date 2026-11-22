@@ -14,7 +14,7 @@ import {
   MapPin,
   Monitor,
 } from "lucide-react";
-import { LoadingSpinner } from "@/components/shared/Loading"; // shared loader
+import { LoadingSpinner } from "@/components/shared/Loading";
 import { Modal, toast } from "@heroui/react";
 import { authClient } from "@/lib/auth-client";
 import { getTuition, type PostedTuition } from "@/lib/api/tuitions";
@@ -25,28 +25,17 @@ import {
   removeBookmark,
 } from "@/lib/api/bookmarks";
 
-// ============================================================
-// TUITION VIEW DETAILS (/tuitions/[id])
-//
-// Loads ONE tuition from GET /api/tuitions/:id and shows the
-// full listing: banner, title, tutor, description and every
-// fact (class level, mode, location, schedule, fee, status).
-//
-// Four states: loading → ready / not found / error.
-// ============================================================
 
-// Which of the four states the page is in right now
 type LoadState = "loading" | "ready" | "notfound" | "error";
 
-// One row in the "Tuition Information" card
 function InfoRow({
   icon: Icon,
   label,
   value,
 }: {
-  icon: typeof GraduationCap; // a lucide icon component
-  label: string; // e.g. "Class Level"
-  value: string; // e.g. "Class 9-10"
+  icon: typeof GraduationCap;
+  label: string;
+  value: string;
 }) {
   return (
     <li className="flex items-center gap-3">
@@ -66,9 +55,7 @@ export default function TuitionDetails({ id }: { id: string }) {
   const [tuition, setTuition] = useState<PostedTuition | null>(null);
   const [state, setState] = useState<LoadState>("loading");
 
-  // ---- load the tuition whenever the id is known ----
   useEffect(() => {
-    // "alive" = ignore the answer if the page was left first
     let alive = true;
 
     getTuition(id)
@@ -80,37 +67,21 @@ export default function TuitionDetails({ id }: { id: string }) {
       .catch((err: Error & { status?: number }) => {
         if (!alive) return;
         console.warn("Could not load tuition:", err);
-        // 404 = this id does not exist (or is not active)
         setState(err.status === 404 ? "notfound" : "error");
       });
 
-    // cleanup: never set state after unmount
     return () => {
       alive = false;
     };
-  }, [id]); // re-run if the id ever changes
+  }, [id]);
 
-  // ============================================================
-  // APPLY MODAL — the real application form
-  // ============================================================
   const { data: session, isPending } = authClient.useSession();
 
-  // ============================================================
-  // ROLE RULE (project requirement): ONLY students may apply.
-  // A signed-in tutor or admin gets a DISABLED Apply button
-  // with a notice (the server answers 403 as well). While the
-  // session is still loading nothing is blocked yet.
-  // Missing role counts as "student", same as verifyToken.
-  // (Cast to plain string: the DB can also hold "admin", which
-  // the BetterAuth type union doesn't list.)
-  // ============================================================
   const role = (session?.user?.role as string | undefined) || "student";
   const isBlocked = !isPending && !!session && role !== "student";
 
   const [applyOpen, setApplyOpen] = useState(false);
   const [applyPending, setApplyPending] = useState(false);
-  // true after THIS browser sent an application (the server
-  // also blocks duplicates, so a reload stays safe)
   const [hasApplied, setHasApplied] = useState(false);
   const [applyForm, setApplyForm] = useState({
     name: "",
@@ -120,43 +91,30 @@ export default function TuitionDetails({ id }: { id: string }) {
     note: "",
   });
 
-  // update one field of the application form
   const updateApply = (key: keyof typeof applyForm, value: string) =>
     setApplyForm((f) => ({ ...f, [key]: value }));
 
-  // ============================================================
-  // BOOKMARK TOGGLE — NEW requirement (2026-11-21):
-  //   "Free Students can bookmark 5 tuitions;
-  //    Pro Students can bookmark unlimited tuitions."
-  // The SERVER owns the limit: when a free student hits 5, the
-  // API answers 403 and we show its message in a toast.
-  // ============================================================
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkBusy, setBookmarkBusy] = useState(false);
 
-  // Ask the API whether THIS tuition is already bookmarked by
-  // me (only signed-in students — everyone else never toggles).
   useEffect(() => {
     if (state !== "ready" || isPending) return;
     if (!session?.user || role !== "student") return;
 
-    // "alive" = ignore the answer if the page was left first
     let alive = true;
     checkBookmark(id)
       .then((data) => {
         if (alive) setIsBookmarked(data.bookmarked);
       })
       .catch(() => {
-        // not critical — the button just starts as "Bookmark"
       });
     return () => {
       alive = false;
     };
   }, [state, isPending, session, role, id]);
 
-  // Save / unsave this tuition (server enforces the 5-slot cap)
   const onBookmarkToggle = async () => {
-    if (bookmarkBusy) return; // no double clicks
+    if (bookmarkBusy) return;
     setBookmarkBusy(true);
     try {
       if (isBookmarked) {
@@ -169,8 +127,6 @@ export default function TuitionDetails({ id }: { id: string }) {
         toast.success(result.message || "Tuition bookmarked!");
       }
     } catch (err) {
-      // e.g. "Free plan allows up to 5 bookmarks. Upgrade to
-      // Pro for unlimited bookmarks" (403 from the server)
       toast.warning(
         err instanceof Error ? err.message : "Could not update bookmark",
       );
@@ -179,21 +135,18 @@ export default function TuitionDetails({ id }: { id: string }) {
     }
   };
 
-  // After sign-in/sign-up, return to this listing and reopen the existing modal.
   useEffect(() => {
     if (state !== "ready" || isPending) return;
 
     const url = new URL(window.location.href);
     if (url.searchParams.get("apply") !== "1") return;
 
-    // Guests who open the return URL directly should sign in first.
     if (!session?.user) {
       const destination = `/tuitions/${encodeURIComponent(id)}?apply=1`;
       router.replace(`/sign-in?callbackUrl=${encodeURIComponent(destination)}`);
       return;
     }
 
-    // A tutor or admin cannot apply. Remove the return flag.
     if (role !== "student") {
       url.searchParams.delete("apply");
       window.history.replaceState(
@@ -210,8 +163,6 @@ export default function TuitionDetails({ id }: { id: string }) {
       phone?: string;
     };
 
-    // Schedule updates outside the synchronous effect body to avoid
-    // react-hooks/set-state-in-effect. Cleanup also handles Strict Mode.
     const timeoutId = window.setTimeout(() => {
       setApplyForm((previous) => ({
         ...previous,
@@ -221,8 +172,6 @@ export default function TuitionDetails({ id }: { id: string }) {
       }));
       setApplyOpen(true);
 
-      // Consume the flag only after scheduling succeeded, so a refresh
-      // or React Strict Mode cleanup does not lose the intended modal.
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.delete("apply");
       window.history.replaceState(
@@ -235,11 +184,9 @@ export default function TuitionDetails({ id }: { id: string }) {
     return () => window.clearTimeout(timeoutId);
   }, [state, isPending, session, role, id, router]);
 
-  // validate -> POST /api/applications -> toast + close
   const onApplySubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // client-side checks (the server checks them again)
     if (applyForm.name.trim().length < 2) {
       toast.warning("Please enter your name");
       return;
@@ -271,7 +218,6 @@ export default function TuitionDetails({ id }: { id: string }) {
       setHasApplied(true);
       setApplyOpen(false); // close the modal
     } catch (err) {
-      // e.g. "You have already applied to this tuition"
       toast.warning(
         err instanceof Error ? err.message : "Could not send application",
       );
@@ -280,7 +226,6 @@ export default function TuitionDetails({ id }: { id: string }) {
     }
   };
 
-  // ---- shared piece: the "back" link on every state ----
   const backLink = (
     <Link
       href="/tuitions"
@@ -291,9 +236,6 @@ export default function TuitionDetails({ id }: { id: string }) {
     </Link>
   );
 
-  // ============================================================
-  // STATE 1: still loading
-  // ============================================================
   if (state === "loading") {
     return (
       <section className="bg-slate-50 py-20">
@@ -302,9 +244,6 @@ export default function TuitionDetails({ id }: { id: string }) {
     );
   }
 
-  // ============================================================
-  // STATE 2: this tuition does not exist (404)
-  // ============================================================
   if (state === "notfound" || !tuition) {
     return (
       <section className="bg-slate-50 py-20">
@@ -324,9 +263,6 @@ export default function TuitionDetails({ id }: { id: string }) {
     );
   }
 
-  // ============================================================
-  // STATE 3: something went wrong (e.g. API server is off)
-  // ============================================================
   if (state === "error") {
     return (
       <section className="bg-slate-50 py-20">
@@ -356,17 +292,12 @@ export default function TuitionDetails({ id }: { id: string }) {
     );
   }
 
-  // ============================================================
-  // STATE 4: READY — the full details
-  // ============================================================
-  // Friendly posted date, e.g. "19 Nov 2026"
   const postedOn = new Date(tuition.createdAt).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 
-  // Status badge color: pending = amber, approved = green, rejected = red
   const statusLabel =
     tuition.approvalStatus === "approved"
       ? "Approved"
@@ -380,7 +311,6 @@ export default function TuitionDetails({ id }: { id: string }) {
         ? "bg-rose-600"
         : "bg-amber-500";
 
-  // Same input styles as the sign-in / post-tuition forms
   const inputClass =
     "h-10 w-full rounded-lg border border-emerald-300 bg-white px-3 text-sm text-gray-800 shadow-sm outline-none transition-all placeholder:text-gray-500 hover:border-emerald-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100";
 
@@ -389,18 +319,12 @@ export default function TuitionDetails({ id }: { id: string }) {
       <div className="mx-auto max-w-6xl px-4">
         {backLink}
 
-        {/* ---- Banner image with badges ---- */}
         <div className="relative mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          {/* Plain <img> on purpose: the banner URL comes from
-              the database and could be any host, which would
-              crash next/image (its remote hosts are allowlisted) */}
-          {/* eslint-disable-next-line @next/next/no-img-element -- banner hosts vary */}
           <img
             src={tuition.image}
             alt={tuition.title}
             className="h-64 w-full object-cover md:h-96"
           />
-          {/* Mode badge: Online = green, Offline = amber */}
           <span
             className={`absolute left-4 top-4 rounded-full px-3.5 py-1.5 text-xs font-bold text-white ${
               tuition.mode === "Online" ? "bg-emerald-600" : "bg-amber-500"
@@ -408,30 +332,23 @@ export default function TuitionDetails({ id }: { id: string }) {
           >
             {tuition.mode}
           </span>
-          {/* Approval status badge (the admin approval flow is
-              live — pending posts stay hidden from Browse until
-              the admin approves them in /dashboard/admin/tuitions) */}
           <span
             className={`absolute right-4 top-4 rounded-full px-3.5 py-1.5 text-xs font-bold text-white ${statusClass}`}
           >
             {statusLabel}
           </span>
-          {/* Subject chip at the bottom-left */}
           <span className="absolute bottom-4 left-4 rounded-full bg-white/95 px-3.5 py-1.5 text-xs font-semibold text-slate-700">
             {tuition.subject}
           </span>
         </div>
 
-        {/* ---- Title + tutor + fee ---- */}
         <div className="mt-6 flex flex-wrap items-start justify-between gap-5">
           <div>
             <h1 className="text-2xl font-extrabold text-slate-900 md:text-3xl">
               {tuition.title}
             </h1>
-            {/* Tutor row: photo (or first letter) + name + date */}
             <div className="mt-3 flex flex-wrap items-center gap-2.5 text-sm text-slate-600">
               {tuition.tutorImage ? (
-                // eslint-disable-next-line @next/next/no-img-element -- profile photos can come from any domain
                 <img
                   src={tuition.tutorImage}
                   alt={tuition.tutorName}
@@ -456,7 +373,6 @@ export default function TuitionDetails({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* Monthly fee highlight */}
           <p className="rounded-2xl bg-emerald-50 px-5 py-3 ring-1 ring-emerald-100">
             <span className="text-2xl font-extrabold text-emerald-600">
               ৳{tuition.fee.toLocaleString()}
@@ -465,20 +381,16 @@ export default function TuitionDetails({ id }: { id: string }) {
           </p>
         </div>
 
-        {/* ---- Two columns: description + information card ---- */}
         <div className="mt-6 grid gap-6 lg:grid-cols-3">
-          {/* Description (2/3 width) */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2">
             <h2 className="text-lg font-bold text-slate-900">
               About this tuition
             </h2>
-            {/* whitespace-pre-line keeps the line breaks the tutor typed */}
             <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600 md:text-base">
               {tuition.description}
             </p>
           </div>
 
-          {/* Information card (1/3 width) */}
           <div className="h-fit rounded-2xl border border-slate-200 bg-white p-6">
             <h2 className="text-lg font-bold text-slate-900">
               Tuition Information
@@ -508,9 +420,6 @@ export default function TuitionDetails({ id }: { id: string }) {
               <InfoRow icon={BadgeCheck} label="Status" value={statusLabel} />
             </ul>
 
-            {/* NOTICE for tutors / admins — requirement: the
-                Apply button is disabled for every non-student
-                role and a notice explains why. */}
             {isBlocked && (
               <p className="mt-6 flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs font-medium leading-relaxed text-amber-700 ring-1 ring-amber-200">
                 <Lock size={14} className="mt-0.5 shrink-0" />
@@ -525,10 +434,6 @@ export default function TuitionDetails({ id }: { id: string }) {
               </p>
             )}
 
-            {/* BOOKMARK BUTTON — NEW requirement (2026-11-21).
-                Students toggle it (server enforces the free
-                5-slot limit), guests are sent to sign-in, and
-                tutors / admins see it disabled like Apply. */}
             <button
               type="button"
               disabled={isBlocked || bookmarkBusy || isPending}
@@ -536,7 +441,6 @@ export default function TuitionDetails({ id }: { id: string }) {
                 if (isPending) return; // session still loading — wait
                 if (isBlocked) return; // safety — already disabled
                 if (!session) {
-                  // not signed in → sign in first, then come back
                   router.push(
                     `/sign-in?callbackUrl=${encodeURIComponent(`/tuitions/${id}`)}`,
                   );
@@ -570,9 +474,6 @@ export default function TuitionDetails({ id }: { id: string }) {
                   : "Free plan: up to 5 bookmarks · Pro: unlimited"}
             </p>
 
-            {/* APPLY BUTTON — opens the HeroUI application modal.
-                Signed-out visitors just get a friendly toast;
-                tutors / admins see it DISABLED (see notice). */}
             <button
               type="button"
               disabled={hasApplied || isBlocked}
@@ -586,10 +487,6 @@ export default function TuitionDetails({ id }: { id: string }) {
                   );
                   return;
                 }
-                // Prefill name / email (and phone if the profile has
-                // one) HERE, at click time — an event handler may set
-                // state, while React's new lint rules disallow doing
-                // it directly inside a useEffect.
                 const u = session.user as {
                   name?: string;
                   email?: string;
@@ -617,11 +514,6 @@ export default function TuitionDetails({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* ==================================================
-            APPLY MODAL (HeroUI) — the real application form.
-            The button above only OPENS it; the application is
-            sent when the student presses "Send Application".
-            ================================================== */}
         <Modal
           isOpen={applyOpen}
           onOpenChange={(open) => {
@@ -644,7 +536,6 @@ export default function TuitionDetails({ id }: { id: string }) {
                     onSubmit={onApplySubmit}
                     className="grid gap-3 sm:grid-cols-2"
                   >
-                    {/* ---------- Your Name ---------- */}
                     <label className="block">
                       <span className="text-sm font-semibold text-gray-800">
                         Your Name *
@@ -657,7 +548,6 @@ export default function TuitionDetails({ id }: { id: string }) {
                       />
                     </label>
 
-                    {/* ---------- Email ---------- */}
                     <label className="block">
                       <span className="text-sm font-semibold text-gray-800">
                         Email *
@@ -671,7 +561,6 @@ export default function TuitionDetails({ id }: { id: string }) {
                       />
                     </label>
 
-                    {/* ---------- Phone ---------- */}
                     <label className="block">
                       <span className="text-sm font-semibold text-gray-800">
                         Phone *
@@ -684,7 +573,6 @@ export default function TuitionDetails({ id }: { id: string }) {
                       />
                     </label>
 
-                    {/* ---------- Preferred Schedule ---------- */}
                     <label className="block">
                       <span className="text-sm font-semibold text-gray-800">
                         Preferred Schedule *
@@ -699,7 +587,6 @@ export default function TuitionDetails({ id }: { id: string }) {
                       />
                     </label>
 
-                    {/* ---------- Note (optional) ---------- */}
                     <label className="block sm:col-span-2">
                       <span className="text-sm font-semibold text-gray-800">
                         Note{" "}
@@ -727,7 +614,6 @@ export default function TuitionDetails({ id }: { id: string }) {
                     >
                       Cancel
                     </button>
-                    {/* form="apply-form" submits the form in Modal.Body */}
                     <button
                       type="submit"
                       form="apply-form"

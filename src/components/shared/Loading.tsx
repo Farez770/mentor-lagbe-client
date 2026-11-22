@@ -1,23 +1,5 @@
-// ============================================================
-// LOADING UI — shared by the route-level loading.tsx files AND
-// by the client components that fetch data in useEffect.
-//
-// Two kinds of feedback (both are "custom" to our app):
-//   1. LoadingSpinner — a spinner + label used while a page's
-//      data request is in flight (replaces 10 copy-pasted blocks)
-//   2. Skeleton blocks — grey, gently pulsing shapes that look
-//      like the real content, used by loading.tsx so navigation
-//      feels instant and "smooth" (no blank white screen)
-//
-// This file is a plain PRESENTATIONAL component (no hooks, no
-// "use client") — it can be imported by Server Components
-// (loading.tsx) and by Client Components (dashboards) alike.
-// ============================================================
 import { Loader2 } from "lucide-react";
 
-// ---------- 1) THE SPINNER ----------
-// Drop-in replacement for "a Loader2 + a <p>" wherever data is
-// loading. role="status" + aria-live lets screen readers know.
 export function LoadingSpinner({
   label,
   compact = false,
@@ -42,9 +24,6 @@ export function LoadingSpinner({
   );
 }
 
-// ---------- 2) SKELETON BUILDING BLOCK ----------
-// animate-pulse gives the soft "breathing" shimmer. aria-hidden
-// because it carries no information for assistive technology.
 export function Skeleton({ className = "" }: { className?: string }) {
   return (
     <div
@@ -54,7 +33,6 @@ export function Skeleton({ className = "" }: { className?: string }) {
   );
 }
 
-// One tuition card placeholder (banner + title + details)
 export function TuitionCardSkeleton() {
   return (
     <div
@@ -75,7 +53,6 @@ export function TuitionCardSkeleton() {
   );
 }
 
-// A grid of tuition card placeholders (Browse / Featured shape)
 export function TuitionGridSkeleton({ count = 6 }: { count?: number }) {
   return (
     <div
@@ -89,24 +66,20 @@ export function TuitionGridSkeleton({ count = 6 }: { count?: number }) {
   );
 }
 
-// Full-page skeleton for public data pages (home / browse)
 export function PageSkeleton() {
   return (
     <div className="bg-slate-50 pb-16" aria-label="Loading page">
       <div className="mx-auto max-w-7xl px-4 pt-12 sm:px-6 lg:px-8">
-        {/* heading area */}
         <div className="space-y-3">
           <Skeleton className="h-3 w-28" />
           <Skeleton className="h-9 w-2/3 max-w-lg" />
           <Skeleton className="h-4 w-1/2 max-w-xl" />
         </div>
-        {/* search + filter bar */}
         <div className="mt-8 flex flex-wrap gap-3">
           <Skeleton className="h-11 w-72 max-w-full" />
           <Skeleton className="h-11 w-40" />
           <Skeleton className="h-11 w-40" />
         </div>
-        {/* the tuition grid */}
         <div className="mt-10">
           <TuitionGridSkeleton />
         </div>
@@ -115,14 +88,12 @@ export function PageSkeleton() {
   );
 }
 
-// Skeleton for /tuitions/[id] (banner + text + apply sidebar)
 export function TuitionDetailsSkeleton() {
   return (
     <div className="bg-slate-50 pb-16" aria-label="Loading tuition details">
       <div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
         <Skeleton className="h-4 w-32" />
         <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_360px]">
-          {/* left: the big banner + description */}
           <div className="space-y-4">
             <Skeleton className="h-64 w-full rounded-2xl" />
             <Skeleton className="h-7 w-4/5" />
@@ -131,7 +102,6 @@ export function TuitionDetailsSkeleton() {
             <Skeleton className="h-4 w-11/12" />
             <Skeleton className="h-4 w-3/4" />
           </div>
-          {/* right: the sticky "Bookmark / Apply" card */}
           <div className="space-y-4 rounded-2xl bg-white p-6 shadow-lg ring-1 ring-emerald-950/5">
             <Skeleton className="h-6 w-2/3" />
             <Skeleton className="h-10 w-full" />
@@ -144,7 +114,6 @@ export function TuitionDetailsSkeleton() {
   );
 }
 
-// Four stat-card placeholders (the shape of every Overview page)
 export function StatCardsSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div
@@ -168,7 +137,6 @@ export function StatCardsSkeleton({ count = 4 }: { count?: number }) {
   );
 }
 
-// Generic list-row placeholder (applications, users, transactions…)
 export function ListSkeleton({ rows = 4 }: { rows?: number }) {
   return (
     <ul aria-hidden="true" className="space-y-4">
@@ -194,13 +162,9 @@ export function ListSkeleton({ rows = 4 }: { rows?: number }) {
   );
 }
 
-// Full dashboard skeleton — mirrors DashboardDrawer's sidebar +
-// content column so navigating between dashboards looks smooth.
-// (dashboard/loading.tsx wraps ALL admin/tutor/student routes.)
 export function DashboardSkeleton() {
   return (
     <div className="flex min-h-screen bg-slate-50" aria-label="Loading dashboard">
-      {/* left sidebar placeholder */}
       <aside className="hidden w-64 shrink-0 space-y-3 border-r border-emerald-950/5 bg-white p-5 lg:block">
         <Skeleton className="h-8 w-32" />
         <div className="space-y-3 pt-8">
@@ -209,7 +173,6 @@ export function DashboardSkeleton() {
           ))}
         </div>
       </aside>
-      {/* right content column */}
       <main className="flex-1 p-6 sm:p-8">
         <div className="space-y-3">
           <Skeleton className="h-3 w-32" />
@@ -227,7 +190,6 @@ export function DashboardSkeleton() {
   );
 }
 
-// Pricing page skeleton (4 plan cards in 2 groups)
 export function PricingSkeleton() {
   return (
     <div className="bg-slate-50 pb-20" aria-label="Loading plans">

@@ -1,19 +1,14 @@
 "use client";
 
-// "use client" — this section starts a Stripe Checkout Session
-// from a button click, so it needs interactivity + browser APIs.
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "@heroui/react"; // sign-in / error messages in the corner
+import { toast } from "@heroui/react";
 import { Check, Loader2, X } from "lucide-react";
 import SectionHeading from "@/components/shared/SectionHeading";
 import FadeIn from "@/components/shared/FadeIn";
-import { authClient } from "@/lib/auth-client"; // to know who (if anyone) is logged in
+import { authClient } from "@/lib/auth-client";
 import { startCheckout, type CheckoutPlan } from "@/lib/api/payments";
 
-// The two paid plans we show on the site.
-// "id" is what gets sent to /api/checkout_sessions — the PRICE
-// always comes from the server's catalog, never from here.
 const plans: {
   id: CheckoutPlan;
   name: string;
@@ -23,11 +18,9 @@ const plans: {
   highlighted: boolean;
 }[] = [
   {
-    id: "student", // Pro Student = $10 (server catalog)
+    id: "student",
     name: "Pro Student",
     price: 10,
-    // requirement update (2026-11-21): benefit = unlimited
-    // bookmarks (Free plan stops at 5), not priority booking
     tagline: "For learners who want unlimited bookmarks",
     features: [
       { text: "Apply to unlimited tuitions", included: true },
@@ -39,7 +32,7 @@ const plans: {
     highlighted: false,
   },
   {
-    id: "tutor", // Pro Tutor = $15 (server catalog)
+    id: "tutor",
     name: "Pro Tutor",
     price: 15,
     tagline: "For tutors who want unlimited reach",
@@ -58,54 +51,37 @@ const plans: {
 export default function PricingSection() {
   const router = useRouter();
 
-  // The BetterAuth session — undefined while loading, null for
-  // guests, { user } once signed in (user.plan = "free" | "pro")
   const { data: session } = authClient.useSession();
 
-  // id of the plan whose button is currently talking to Stripe
   const [busy, setBusy] = useState<CheckoutPlan | null>(null);
 
-  // Is this visitor ALREADY on Pro? (no need to buy twice)
   const isPro = String(session?.user?.plan ?? "free").toLowerCase() === "pro";
 
-  // ------------------------------------------------------------
-  // "Subscribe with Stripe" was clicked
-  // ------------------------------------------------------------
   const onSubscribe = async (planId: CheckoutPlan) => {
-    // guests must sign in first (they return to this page after)
     if (!session) {
       toast.warning("Please sign in to upgrade to Pro");
       router.push("/sign-in");
       return;
     }
 
-    // already Pro? nothing to purchase
     if (isPro) {
       toast.success("You already have the Pro plan 🎉");
       return;
     }
 
-    setBusy(planId); // spin this button, disable the other
+    setBusy(planId);
     try {
-      // POST /api/checkout_sessions -> hosted Stripe page URL
-      // (role decides tutor/student, server decides the price)
       const { url } = await startCheckout(planId);
-      // .assign() (instead of `href = url`) keeps the React
-      // Compiler happy — it treats plain assignments to window
-      // properties as illegal mutations during render analysis.
-      window.location.assign(url); // Stripe takes over from here
+      window.location.assign(url);
     } catch (err) {
-      // 400 wrong role for this plan / already pro, 403 admin,
-      // 401 signed out mid-click, network problems...
       toast.warning(
         err instanceof Error ? err.message : "Could not start checkout",
       );
-      setBusy(null); // only reached when we stay on this page
+      setBusy(null);
     }
   };
 
   return (
-    // id so /payment/cancel can link straight back here (#pricing)
     <section id="pricing" className="py-20 bg-slate-50">
       <div className="max-w-7xl mx-auto px-4">
         <SectionHeading
@@ -124,7 +100,6 @@ export default function PricingSection() {
                   : "bg-white border-slate-200"
               }`}
             >
-              {/* Plan name + highlighted badge */}
               <div className="flex items-center justify-between">
                 <h3
                   className={`text-lg font-bold ${
@@ -147,7 +122,6 @@ export default function PricingSection() {
                 {plan.tagline}
               </p>
 
-              {/* Price display */}
               <p className="mt-6">
                 <span className="text-5xl font-extrabold">${plan.price}</span>
                 <span
@@ -160,7 +134,6 @@ export default function PricingSection() {
                 </span>
               </p>
 
-              {/* Feature list with check/cross icons */}
               <ul className="mt-8 space-y-3 flex-grow">
                 {plan.features.map((feature) => (
                   <li key={feature.text} className="flex items-center gap-3 text-sm">
@@ -192,14 +165,6 @@ export default function PricingSection() {
                 ))}
               </ul>
 
-              {/* ============ REAL STRIPE CHECKOUT BUTTON ============
-                  guest     -> toast + redirect to /sign-in
-                  signed in -> POST /api/checkout_sessions, then
-                               the browser navigates to Stripe's
-                               hosted card form ($15 tutor / $10
-                               student — the SERVER sets the price)
-                  already Pro -> button is disabled
-                  ============================================== */}
               <button
                 type="button"
                 onClick={() => onSubscribe(plan.id)}
@@ -226,7 +191,6 @@ export default function PricingSection() {
           ))}
         </div>
 
-        {/* Free plan note under the cards */}
         <FadeIn delay={0.2}>
           <p className="text-center text-sm md:text-base text-slate-600 mt-8">
           Every account starts on the <b>Free plan</b> — students can apply to

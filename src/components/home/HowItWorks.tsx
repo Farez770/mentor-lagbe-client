@@ -2,7 +2,6 @@ import { UserPlus, Search, FileSignature, Rocket } from "lucide-react";
 import SectionHeading from "@/components/shared/SectionHeading";
 import FadeIn from "@/components/shared/FadeIn";
 
-// The 4 simple steps of using MentorLagbe
 const steps = [
   {
     icon: UserPlus,
@@ -40,12 +39,10 @@ export default function HowItWorks() {
           description="From signing up to starting your first class — everything happens in four easy steps."
         />
 
-        {/* Step cards with number badges */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, index) => (
             <FadeIn key={step.title} delay={index * 0.12} className="h-full">
               <div className="relative bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg transition-shadow h-full">
-                {/* Step number in the corner */}
                 <span className="absolute top-4 right-4 text-5xl font-extrabold text-slate-200">
                   {index + 1}
                 </span>

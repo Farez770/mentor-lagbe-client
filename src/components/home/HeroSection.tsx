@@ -8,7 +8,6 @@ export default function HeroSection() {
   return (
     <section className="bg-gradient-to-b from-emerald-50 via-white to-white overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 pt-14 pb-20 md:pt-20 md:pb-28 grid items-center gap-12 lg:grid-cols-2">
-        {/* Left: text side */}
         <div className="text-center lg:text-left">
           <FadeIn>
             <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-sm font-semibold mb-5">
@@ -31,7 +30,6 @@ export default function HeroSection() {
             </p>
           </FadeIn>
 
-          {/* Search bar (design only) */}
           <FadeIn delay={0.3}>
             <div className="mt-8 flex flex-col sm:flex-row gap-3 max-w-lg mx-auto lg:mx-0">
               <div className="flex items-center flex-grow bg-white border border-slate-300 rounded-xl px-4 py-3">
@@ -51,7 +49,6 @@ export default function HeroSection() {
             </div>
           </FadeIn>
 
-          {/* Small stat row under the search bar (wraps on small screens) */}
           <FadeIn delay={0.4}>
             <div className="mt-10 flex flex-wrap justify-center lg:justify-start gap-6 sm:gap-10 lg:gap-12">
               <div>
@@ -85,7 +82,6 @@ export default function HeroSection() {
           </FadeIn>
         </div>
 
-        {/* Right: image side with entrance animation and floating cards */}
         <FadeIn delay={0.3} className="relative">
           <Image
             src="/bannar-img.png"
@@ -96,9 +92,6 @@ export default function HeroSection() {
             className="w-full h-auto sm:h-96 lg:h-[480px] object-cover rounded-3xl shadow-xl text-black"
           />
 
-          {/* Floating mini cards on top of the image (they gently bob).
-              They use smaller text/padding on mobile so they never
-              stick out past the screen edge. */}
           <Float
             delay={0.5}
             className="absolute -bottom-4 sm:-bottom-5 left-3 sm:left-8"

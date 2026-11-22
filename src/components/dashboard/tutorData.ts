@@ -8,44 +8,26 @@ import {
   Sparkles,
 } from "lucide-react";
 
-// ============================================================
-// Shared data for EVERY tutor dashboard page
-// (Overview, Post a Tuition, My Tuitions, ...).
-//
-// It lives in its own file so all those pages show the exact
-// same sidebar without copy-pasting.
-// ============================================================
 
-// Fallback user shown in the sidebar's user card while the
-// BetterAuth session is still loading. DashboardDrawer replaces
-// it with the REAL logged-in user (name, role, plan, photo) as
-// soon as useSession() answers. Also used for the demo stats.
 export const demoTutor = {
-  name: "Rahat Karim", // fallback for the "Welcome back" heading
-  plan: "Free", // "Free" or "Pro" (requirement: Current Plan card)
+  name: "Rahat Karim",
+  plan: "Free",
 };
 
-// ============================================================
-// All sections shown inside the tutor's LEFT SIDEBAR.
-// The first three routes are required by the project spec:
-//   1. /dashboard/tutor/post-tuition  (Post a Tuition Page) ✅
-//   2. /dashboard/tutor/my-tuitions   (My Created Tuitions ✅)
-//   3. /dashboard/tutor/applicants    (Manage Applicants — works now ✅)
-// ============================================================
 export const tutorSections = [
-  { name: "Overview", href: "/dashboard/tutor", icon: LayoutDashboard }, // works now ✅
+  { name: "Overview", href: "/dashboard/tutor", icon: LayoutDashboard },
   {
     name: "Post a Tuition",
     href: "/dashboard/tutor/post-tuition",
     icon: FilePlus,
-  }, // works now ✅ (form + real API)
-  { name: "My Tuitions", href: "/dashboard/tutor/my-tuitions", icon: BookOpen }, // works now ✅ (list + edit/toggle/delete)
+  },
+  { name: "My Tuitions", href: "/dashboard/tutor/my-tuitions", icon: BookOpen },
   {
     name: "Manage Applicants",
     href: "/dashboard/tutor/applicants",
     icon: Users,
-  }, // works now ✅ (list + accept/reject)
-  { name: "Update Profile", href: "/dashboard/profile", icon: UserCog }, // works now ✅ (any role)
-  { name: "Upgrade to Pro", href: "/pricing", icon: Sparkles }, // works now ✅ (pricing page + Stripe Checkout)
-  { name: "Back to Home", href: "/", icon: Home }, // works now ✅
+  },
+  { name: "Update Profile", href: "/dashboard/profile", icon: UserCog },
+  { name: "Upgrade to Pro", href: "/pricing", icon: Sparkles },
+  { name: "Back to Home", href: "/", icon: Home },
 ];
