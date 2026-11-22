@@ -88,8 +88,7 @@ function SuccessContent() {
                 ${payment?.amount.toFixed(2)}{" "}
                 {String(payment?.currency ?? "usd").toUpperCase()}
               </b>{" "}
-              for the{" "}
-              <b>{planLabel[payment?.product ?? ""] ?? "Pro"}</b>.
+              for the <b>{planLabel[payment?.product ?? ""] ?? "Pro"}</b>.
             </p>
             <p className="mt-1 text-sm font-semibold text-emerald-700">
               Your account is now Pro ✨
@@ -104,6 +103,7 @@ function SuccessContent() {
               {session && (
                 <Link
                   href={dashboardHref}
+                  onClick={() => window.location.replace(dashboardHref)}
                   className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
                 >
                   Go to my Dashboard
