@@ -176,7 +176,7 @@ function SidebarContent({
       <div
         className={`border-t border-slate-100 ${collapsed ? "lg:p-3" : "p-4"}`}
       >
-        <div
+        {/* <div
           className={`mb-3 flex items-center justify-between rounded-xl bg-slate-50 py-2 ${
             collapsed ? "lg:justify-center lg:px-0" : "px-3"
           }`}
@@ -189,7 +189,7 @@ function SidebarContent({
             Appearance
           </span>
           <ThemeToggle compact />
-        </div>
+        </div> */}
         <button
           type="button"
           onClick={handleSignOut}

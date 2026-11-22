@@ -11,6 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Image from "next/image";
 
 const testimonials = [
   {
@@ -71,7 +72,7 @@ export default function TestimonialsSection() {
                   key={item.name}
                   className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
                 >
-                  <div className="flex flex-col h-full bg-slate-50 border border-slate-200 rounded-2xl p-6 md:p-7 hover:shadow-lg transition-shadow">
+                  <div className="flex flex-col h-full bg-slate-100 border border-slate-200 rounded-2xl p-6 md:p-7 hover:shadow-lg transition-shadow">
                     <div className="flex gap-1 mb-4">
                       {Array.from({ length: 5 }).map((_, index) => (
                         <Star
@@ -90,9 +91,11 @@ export default function TestimonialsSection() {
                     </p>
 
                     <div className="flex items-center gap-3 mt-6 pt-5 border-t border-slate-200">
-                      <img
+                      <Image
                         src={item.image}
                         alt={item.name}
+                        width={44}
+                        height={44}
                         className="w-11 h-11 rounded-full object-cover"
                       />
                       <div>
