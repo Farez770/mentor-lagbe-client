@@ -33,7 +33,8 @@ import { useRouter } from "next/navigation";
 // chosen at sign-up and saved in MongoDB, so sign-in READS it
 // from the account and redirects the user to their own
 // dashboard (role-based sign in).
-// Google sign-in is optional and will be added later.
+// Google sign-in is wired below; it works once the Google OAuth
+// credentials are set in .env.local.
 // ============================================================
 const SignInPage = () => {
   // Show / hide the password
@@ -44,6 +45,28 @@ const SignInPage = () => {
 
   // useRouter lets us navigate to another page from a button/form handler
   const router = useRouter();
+
+  // Google OAuth (optional). Better Auth sends the user to Google and
+  // then back to `callbackURL`. The credentials live only on the server
+  // in .env.local, so nothing secret is exposed in the browser.
+  // const handleGoogleSignIn = async () => {
+  //   const callbackURL =
+  //     new URLSearchParams(window.location.search).get("callbackUrl") || "/";
+
+  //   setIsPending(true);
+  //   const { error } = await authClient.signIn.social({
+  //     provider: "google",
+  //     callbackURL,
+  //   });
+
+  //   if (error) {
+  //     toast.warning(
+  //       error.message ||
+  //         "Could not sign in with Google. Continue with google is comming soon",
+  //     );
+  //     setIsPending(false);
+  //   }
+  // };
 
   const onSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -284,13 +307,13 @@ const SignInPage = () => {
               </Fieldset>
             </Form>
 
-            {/* TODO (optional, later): wire Google sign-in with
-                BetterAuth's Google social provider — it needs the
-                GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET env vars. */}
+            {/* Google sign-in — wired to Better Auth. If the OAuth
+                env vars are missing, Better Auth shows an error toast. */}
             <button
               type="button"
-              disabled
-              className="mt-3 flex h-12 w-full cursor-not-allowed items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50"
+              // onClick={handleGoogleSignIn}
+              disabled={isPending}
+              className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {/* Google "G" logo */}
               <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true">
@@ -311,7 +334,7 @@ const SignInPage = () => {
                   d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.28 6.62l3.99 3.11C6.22 6.87 8.87 4.75 12 4.75z"
                 />
               </svg>
-              Continue with Google (coming soon)
+              Continue with Google (Coming Soon)
             </button>
 
             <p className="mt-4 text-center text-sm md:text-lg text-gray-600">

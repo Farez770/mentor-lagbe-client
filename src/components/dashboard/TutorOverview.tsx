@@ -20,9 +20,8 @@ import { getTuitionStats, type TutorStats } from "@/lib/api/tuitions";
 //   1. Total Tuitions Posted      -> GET /api/tuitions/stats
 //   2. Active / Approved Tuitions -> GET /api/tuitions/stats
 //   3. Total Applicants Received  -> GET /api/tuitions/stats
-//      (REAL count since 2026-11-21 — it used to be a
-//      hardcoded 0 with a TODO; the server now counts the
-//      "applications" collection for this tutor)
+//      (REAL count — the server counts the "applications"
+//      collection for this tutor)
 //   4. Current Plan               -> the real session plan
 // The numbers are fetched inside the component below — this
 // file no longer has any hardcoded demo values.

@@ -13,15 +13,11 @@ import {
 } from "@/components/ui/carousel";
 
 // ============================================================
-// TODO (for you, later): replace this static list with real data.
-// Flow you will implement:
-// 1. A student whose application status is 'accepted' submits a
-//    review (1-5 stars + comment) from the Tuition Details page.
-// 2. That review gets saved in the database (inside the
-//    tuitions collection as reviews, with the student info).
-// 3. Call your API here (for example GET /api/reviews) and
-//    map over the API data in this carousel instead of the
-//    sample list below.
+// Editorial testimonials are intentionally static. The project's
+// database design has exactly 4 collections (users, tuitions,
+// applications, payments), so a separate reviews collection or
+// API is deliberately not part of this app. These sample quotes
+// keep the landing page rich without changing that data design.
 // ============================================================
 const testimonials = [
   {

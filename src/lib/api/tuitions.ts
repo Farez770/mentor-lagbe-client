@@ -28,6 +28,8 @@ export type PostedTuition = CreateTuitionInput & {
   postedBy: string; // tutor's user id
   tutorName: string;
   tutorImage?: string;
+  tutorPlan?: "free" | "pro"; // joined from users.plan on the details route
+  tutorVerified?: boolean; // true when tutorPlan === "pro"
   createdAt: string;
 };
 
